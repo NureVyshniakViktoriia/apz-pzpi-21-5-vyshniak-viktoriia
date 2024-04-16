@@ -24,7 +24,9 @@ public class NotificationRepository : INotificationRepository
 
     public IQueryable<Notification> GetAllByUserId(int userId)
     {
-        return _notifications.Where(n => n.UserId == userId);
+        return _notifications
+            .Where(n => n.UserId == userId)
+            .OrderByDescending(n => n.CreatedOnUtc);
     }
 
     public Notification GetById(Guid notificationId)

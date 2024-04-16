@@ -17,5 +17,8 @@
     "EmailUserName": "noreplyrestogen12@gmail.com",
     "EmailPassword": "bkzb qqql bwdx sgic",
     "ResetPasswordUrl": "https://192.168.0.102:7009/api/User/request-reset-password?token={0}"
+  },
+  "GoogleMapsCreds": {
+    "ApiKey": ""
   }
 }
