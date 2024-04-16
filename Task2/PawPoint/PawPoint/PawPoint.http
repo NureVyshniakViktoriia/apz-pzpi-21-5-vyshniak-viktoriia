@@ -1,0 +1,6 @@
+@PawPoint_HostAddress = http://localhost:5210
+
+GET {{PawPoint_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "ipiVAl28C5QtPA8JrNBW1BzF6nA/yIIilAeHI+UAFDIs8rjl8XdekxSl0PrUPpCDCHfKngQcqi8f7gaWeOhC+A==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\vikad\\apz-pzpi-21-5-vyshniak-viktoriia\\Task2\\PawPoint\\BLL.Startup\\BLL.Startup.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\vikad\\.nuget\\packages\\autofac\\8.0.0\\autofac.8.0.0.nupkg.sha512",
+    "C:\\Users\\vikad\\.nuget\\packages\\system.diagnostics.diagnosticsource\\7.0.2\\system.diagnostics.diagnosticsource.7.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

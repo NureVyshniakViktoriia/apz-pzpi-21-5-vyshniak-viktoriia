@@ -1,0 +1,21 @@
+{
+  "Auth": {
+    "Issuer": "authServer",
+    "Audience": "webApi",
+    "Secret": "LkLKinpFN&09hfm94S(*&f9w7e9t8yd9*(*&F(ASdSA8d9sd8f9*989F*&(a*f7",
+    "TokenLifetime": "3600",
+    "RefreshTokenLifetime": "36000"
+  },
+  "Connection": {
+    "Host": "VIKKKATORIA",
+    "Database": "PawPoint",
+    "Password": "1111",
+    "ConnectionString": "Server={0};Database={1};User ID=sa;Password={2};TrustServerCertificate=true;"
+  },
+  "EmailCreds": {
+    "EmailHost": "smtp.gmail.com",
+    "EmailUserName": "noreplyrestogen12@gmail.com",
+    "EmailPassword": "bkzb qqql bwdx sgic",
+    "ResetPasswordUrl": "https://192.168.0.102:7009/api/User/request-reset-password?token={0}"
+  }
+}

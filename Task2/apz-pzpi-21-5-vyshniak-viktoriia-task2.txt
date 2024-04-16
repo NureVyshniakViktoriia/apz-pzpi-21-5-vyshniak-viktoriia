@@ -1,0 +1,699 @@
+МЕТА РОБОТИ
+
+
+Мета лабораторної роботи – набуття навичок із розробки серверних застосунків для великих проєктів, зокрема для розроблюваної програмної системи «Програмна система для контролю за місцезнаходженням і здоров’ям тварин та зручності відвідування закладів пет-френдлі».
+У ході лабораторної роботи має бути спроектовано базу даних та написано серверну частину системи, створено Use Case діаграму, ER-діаграму, діаграму компонентів та діаграму розгортання. 
+
+ 
+1 АРХІТЕКТУРА ТА ОПИС ПРОГРАМНИХ ЗАСОБІВ
+
+
+Серверна частина системи представлена ASP.NET Core Web API-застосунком, написаним на об’єктно орієнтованій мові програмування C# та платформі .NET 8.
+На рисунку 1.1 можна побачити архітектуру серверної частини застосунку.
+Для реалізації серверної частини застосунку була використана багатошарова архітектура з поділом на наступні рівні: Domain, DAL, BLL, WebAPI. Цей тип архітектури було обрано через високий рівень абстрактності, яка допомагає підтримувати малу зв’язність та забезпечує легку розширюваність застосунку.
+У директорії «Config» зберігається config.json з наступними налаштуваннями проєкту: налаштування авторизації, налаштування Google Map API, рядок підключення до БД та SMTP-налаштування.
+У директорії «Domain» розташовані два проекти: «Common» та «Domain». 
+У «Common» знаходяться моделі для налаштування авторизації, підключення до БД та SMTP-налаштування; статичні класи з константами валідації та регулярних виразів; користувацькі помилки; Enums; методи розширення; налаштування IoC-контейнеру; статичний клас «Resources» та .resx-файли для локалізації.
+У «Domain» знаходяться моделі для бази даних.
+У директорії «DAL» розташовані три проєкти: «DAL» та «DAL.Startup». Даний шар архітектури слугує для забезпечення роботи з базою даних. Для взаємодії з моделями бази даних було обрано ORM Entity Framework Core. У якості СУБД було обрано MS SQL Server 2019.
+У «DAL.Startup» реєструються усі репозиторії разом з відповідними інтерфейсами та клас «UnitOfWork». Патерн «UnitOfWork» призначений для керування транзакціями та збереженням змін у базі даних. У конкретному випадку він об’єднує інтерфейси репозиторіїв в одному класі для зручної ін’єкції у сервіси.
+У «DAL» знаходяться наступні директорії: «Contracts» з усіма необхідними інтерфейсами, «DbContexts» з класом для взаємодії з БД та налаштування зв’язків між моделями (див. Додаток В «Код основної бізнес-логіки системи»), «Repositories» з усіма необхідними репозиторіями та «Infrastructure», в якій знаходяться моделі, методи розширень, допоміжний клас для шифрування та розшифрування даних та налаштування профілів для Automapper.
+У директорії «BLL» знаходиться уся бізнес-логіка та три проєкти: «BLL» та «BLL.Startup».
+У проєкті «BLL» зберігаються бізнес-сервіси для роботи з моделями, сервіс для роботи з SMTP та платіжні сервіси. У директорії «Infrastructure» знаходяться моделі для передачі даних, допоміжні класи для створення PDF–файлів та профілі дня налаштування Automapper.
+У «BLL.Startup» реєструються усі сервіси разом з відповідними інтерфейсами.
+У директорії «WebAPI» розташовані усі контролери, допоміжні моделі та клас «MiddlewareExtensions», що є проміжним програмним забезпеченням та слугує для конфігурації застосунку. У цьому класі також розташований глобальний обробник помилок застосунку.
+Крім того, у проєкті використано патерн «Dependency Injection», що є реалізацією приниципу «Inversion of Control» та слугує для побудови застосунку на абстракціях та забезпечення малої зв’язності між компонентами системи.
+У розроблюваній системі завдання локалізації на стороні сервера полягає в правильній обробці дати та часу. Це досягається шляхом реєстрації часу на сервері при обробці запитів на створення або оновлення даних. Система зберігає серверні дані в форматі UTC, щоб уникнути проблем з часовими зонами та переходами на літній та зимовий час. Під час виведення даних на стороні клієнта вони конвертуються в належний формат дати та часу з урахуванням вибраної локалі. Система підтримує дві локалі: en-US та uk-UA.
+Забезпечення безпеки даних у серверному застосунку включає:
+- гешування паролів користувачів алгоритмом Blowfish;
+- гешування медичних документів алгоритмом AES;
+- використання ORM фреймворку Entity Framework для запобігання SQL ін’єкціям;
+- упроваджені аутентифікація і авторизація користувачів за токеном JWT з використанням симетричного ключа. Права доступу користувачів перевіряються перед доступом до конкретних ресурсів в залежності від ролі конкретного користувача.
+Для формування рейтингу пет-френдлі установи недостатньо лише середньої оцінки, тому було використано розрахунок метрики популярності установи за допомогою зваженого рейтингу (формула 1.1). У цьому й полягає реалізація бізнес-логіки та робота з математичними обчисленнями, за допомогою якої можна правильно оцінити певний заклад пет-френдлі (див. Додаток В «Код основної бізнес-логіки системи»). 
+
+Weighted Rating (WR) =(v/(v+m)⋅R)+ (m/(v+m)⋅C)                                    (1.1)
+де v – кількість оцінок установи пет-френдлі; 
+m – мінімальна кількість оцінок у вибірці; 
+R – середній рейтинг конкретного заклад; 
+С – середнє значення рейтингу серед усіх закладів пет-френдлі.
+
+До деяких з використаних під час розробки серверної частини проєкту  Nuget-пакетів відносяться наступні: Autofac, Automapper, BCrypt.net, MailKit, Mime.Kit, PdfSharp, Microsoft.AspNetCore.Authentication.JwtBearer.
+
+ 
+2 ПОБУДОВА USE CASE ДІАГРАМИ
+
+
+За допомогою загальної Use-Case діаграми наведено опис функціонального призначення системи, що створюється (див. Додаток Б рис. Б.2).
+З даної діаграми можна побачити можливості основних бізнес-користувачів системи – неавторизованого користувача, авторизованого користувача (власника домашнього улюбленця), системного адміністратора та адміністратора закладу пет-френдлі.
+Неавторизований користувач має можливість авторизуватися, зареєструватися, заповнивши відповідну анкету, та змінити пароль шляхом отримання листа на вказану пошту і введенням нового паролю.
+Власник тварини може переглядати наявні заклади пет-френдлі в системі, використовувати пошук, сортування та фільтрацію по відповідним установах; управляти профілями домашніх тварин (створювати профіль тварини, редагувати та видаляти його); робити записи в щоденнику здоров’я тварини та завантажувати відповідні медичні документи; отримувати статистику за актуальним місцезнахлдженням тварини та показниками її температури за обраний період; ставити оцінку закладу пет-френдлі.
+Адміністратор закладу пет-френдлі має можливість управляти закладом (створювати новий, редагувати та видаляти наявні), переглядати наявні заклади пет-френдлі в системі, використовувати пошук, сортування та фільтрацію по відповідним установах; отримувати повідомлення з інформацією про тварин-відвідувачів. 
+Системний адміністратор має можливість управляти резервними копіями та керувати користувачами системи з можливістю видавати їм відповідні ролі.
+
+		 
+3 ПОБУДОВА ER-ДІАГРАМИ
+
+
+Для того, щоб правильно розробити схему реляційної бази даних, необхідно обрати ті поняття, дані про які і будуть у подальшому там зберігатися. 
+Можна виділити наступні сутності: заклади пет-френдлі («Institutions»), домашні тварини («Pets»), користувачі («Users»), профілі користувача («UserProfiles»), рейтинги закладів («Ratings»), записи показників здоров’я тварини («HealthRecords»), записи щоденника здоров’я тварини («DiaryNotes»), послуги установ («Facilities»), повідомлення («Notifications»), токени зміни паролю («ResetPasswordTokens») та токени оновлення («RefreshTokens»). 
+Зв’язки між ними наведено за допомогою ER-діаграми (див. Додаток Б рис. Б.1). 
+
+ 
+4 REST-СПЕЦИФІКАЦІЯ
+
+
+REST API складається з багатьох ендпоінтів для забезпечення взаємодії клієнтської та серверної частин застосунку.
+Можна виділити наступні контролери: «UserController», «AuthController» (Identity Server), «PetController», «DiaryNoteController», «HealthRecordController», «InstitutionController», «FacilityController», «NotificationController». 
+Специфікація кожного контролеру наведена у Додатку А.
+
+ 
+5 ПОБУДОВА ДІАГРАМИ РОЗГОРТАННЯ
+
+
+Для представлення фізичної форми програмної системи, що розробляється, було побудовано діаграму розгортання (див. рис. 5.1).
+Можна побачити, що система з 4 основних компонентів: локальний сервер, мобільний пристрій, браузер та компонент Arduino С. У свою чергу, локальний сервер складається з серверної частини застосунку, frontend-частини та компонента бази даних.
+Локальний сервер взаємодіє з компонентами Arduino C та мобільним пристроєм через порт 7114, а з браузером – з використанням порту 80.
+ 
+
+6 ПОБУДОВА ДІАГРАМИ КОМПОНЕНТІВ
+
+
+За допомогою діаграми компонентів побудовано структурні компоненти серверної частини системи, зв’язки та залежності між ними (див. Додаток Б рис. Б.3 та Б.4).
+На діаграмі можна побачити, що контролери залежать від рівню бізнес-логіки, який, у свою чергу, залежить від рівня доступу до даних. Ін’єкція репозиторіїв у сервіси системи відбувається з використанням патерну «UnitOfWork». Для ін’єкції залежностей використано патерн «Dependency Injection».
+ 
+
+ВИСНОВКИ
+
+
+У результаті виконання лабораторної роботи було створено серверну частину програмної системи для контролю за місцезнаходженням і здоров’ям тварин та зручності відвідування закладів пет-френдлі «PawPoint». Крім цього, у ході роботи було створено Use Case діаграму, ER-діаграму, діаграму компонентів та діаграму розгортання.
+Посиланя на репозиторій github: 
+https://github.com/NureVyshniakViktoriia/apz-pzpi-21-5-vyshniak-viktoriia/tree/main/Task2.
+Посилання на відео з захистом в YouTube: https://youtu.be/DjutQCdeAXY.
+
+ 
+ДОДАТОК А
+REST-специфікація
+
+Таблиця 1 – Ендпоінти контролеру AuthController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+login	POST	FromBody	login	string	Ok, Bad Request
+			password		
+get-user-by-refresh-token	GET	FromHeader	refreshTokenString	string	Ok, Bad Request
+
+
+Таблиця 2 – Ендпоінти контролеру PetController
+Дія	Метод	Параметр	                               Відповіді
+		Джерело	        Назва	         Тип	
+apply	POST	FromBody	petId	        Guid?	       Ok, Bad Request, Unauthorized, Forbidden
+			        ownerId	        int	
+			        nickName        string	
+			        petType	        PetType	
+			        birthDate       DateTime	
+			        breed	        string	
+			        weight	        double	
+			        height	        double	
+			        characteristics	string	
+			        preferences     string	
+			        illnesses       string	
+			        rfid	        string	
+get-all-by-owner-id GET	FromQuery ownerId	int	Ok, Bad Request, Unauthorized
+get-pet-by-id	GET	FromQuery petId	        Guid	Ok, Bad Request, Unauthorized
+delete	DELETE	FromQuery	petId	        Guid	Ok, Bad Request, Unauthorized,Forbidden
+
+Таблиця 3 – Ендпоінти контролеру NotificationController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+get-notifications-by-user-id	GET	FromQuery	userId	int	Ok, Bad Request, Forbidden, Unauthorized
+get-notification-by-id	GET	FromQuery	notificationId	Guid	Ok, Bad Request, Forbidden, Unauthorized
+
+Таблиця 4 – Ендпоінти контролеру UserController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+request-reset-password	GET	FromQuery	token	string	Ok, Bad Request
+forgot-password	POST	FromBody	email	string	Ok, Bad Request
+register	POST	FromBody	login	string	Ok, Bad Request
+			password	string	
+			role	Role	
+			region	Region	
+			gender	Gender	
+			email	string	
+reset-password	POST	FromBody	token	string	Ok, Bad Request
+
+			password	string	
+			confirmPassword	string	
+get-all	GET				Ok, Unauthorized, Forbidden
+get-user-profile	GET	FromQuery	userId	int	Ok, Bad Request, Unauthorized
+update-user-info	POST	FromBody	userId	int	Ok, Bad Request, Unauthorized
+
+			email	string	
+			gender	Gender	
+			region	Region	
+set-user-role	POST	FromBody	userId	int	Ok, Bad Request, Unauthorized, Forbidden
+			role	Role	
+do-db-backup	POST				Ok, Unauthorized, Forbidden
+
+Таблиця 5 – Ендпоінти контролеру HealthRecordController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+get-health-records	POST	FromBody	petId	Guid	Ok, Bad Request, Unauthorized
+			startDate	DateTime?	
+			endDate	DateTime?	
+get-health-record-statistics	GET	FromQuery	petId	Guid	Ok, Bad Request, Unauthorized, Forbidden
+			endDate	DateTime?	
+			startDate	DateTime?	
+
+Таблиця 6 – Ендпоінти контролеру InstitutionController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+apply	POST	FromBody	institutionId	int?	Ok, Bad Request, Unauthorized, Forbidden
+			ownerId	int	
+			description	string	
+			name	string	
+			latitude	double	
+			longtitude	double	
+			address	string	
+			phoneNumber	string	
+			institutionType	Institution-Type	
+			webstiteUrl	string	
+delete	DELETE	FromQuery	institutionId	int	Ok, Bad Request, UnauthorizedForbidden
+set-rating	POST	FromBody	institutionId	int	Ok, Unauthorized, Bad Request
+			userId	int	
+			mark	int	
+list	GET	FromBody	searchQuery	string	Ok, Unauthorized Bad Request
+			pageSize	int	
+			pageCount	int	
+			institutionType	Institution-Type?	
+			sortByRatingAscending	bool	
+get-institution-by-id	GET	FromQuery	institutionId	int	Ok, Bad Request, Unauthorized
+upload-logo	POST	FromForm	institutionId	int	Ok, Bad Request, Unauthorized, Forbidden
+			file	IFormFile	
+get-by-owner-id	GET	FromQuery	ownerId	int	Ok, Bad Request, Unauthorized,Forbidden
+add-facility-institution	POST	FromBody	institutionId	int	Ok, Bad Request, Unauthorized,Forbidden
+			facilityId	int	
+remove-facility-institution	POST	FromBody	institutionId	int	Ok, Bad Request, Unauthorized, Forbidden
+			facilityId	int	
+
+Таблиця 7 – Ендпоінти контролеру FacilityController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+apply	POST	FromBody	facilityId	int?	Ok, Bad Request, Unauthorized, Forbidden
+			name	string	
+			description	string	
+get-all-by-institution-id	GET	FromQuery	institutionId	int	Ok, Bad Request, Unauthorized, Forbidden
+get-facility-by-id	GET	FromQuery	facilityId	int	Ok, Bad Request, Unauthorized, Forbidden
+get-all					Ok, Unauthorized,Forbidden
+delete	DELETE	FromQuery	facilityId	int	Ok, Bad Request, Unauthorized, Forbidden,
+
+Таблиця 8 – Ендпоінти контролеру DiaryNoteController
+Дія	Метод	Параметр	Відповіді
+		Джерело	Назва	Тип	
+apply	POST	FromBody	diaryNoteId	Guid?	Ok, Bad Request, Unauthorized, Forbidden
+			petId	Guid	
+			title	string	
+			comment	string	
+delete	DELETE	FromQuery	diaryNoteId	Guid	Ok, Bad Request, Unauthorized, Forbidden
+get-all-for-pet	GET	FromQuery	petid	Guid	Ok, Unauthorized, Forbidden, Bad Request
+download-document	GET	FromQuery	diaryNoteId	Guid	Ok, Unauthorized Bad Request
+get-note-by-id	GET	FromQuery	diaryNoteId	Guid	Ok, Bad Request, Forbidden, Unauthorized
+upload-document	POST	FromForm	diaryNoteId	Guid	Ok, Bad Request, Unauthorized, Forbidden
+
+
+ДОДАТОК Б
+Код основної бізнес-логіки системи
+
+
+Код класу InstitutionService.cs:
+
+1  using AutoMapper;
+2  using BLL.Contracts;
+3  using BLL.Infrastructure.Models.Institution;
+4  using Common.Extensions;
+5  using Common.Resources;
+6  using DAL.Infrastructure.Models.Filters;
+7  using DAL.UnitOfWork;
+8  using Domain.Models;
+9  
+10  namespace BLL.Services;
+11  
+12  public record WeightedRatingGlobalCompounds(double AvgRatingForSet, int MinCountRatingForSet);
+13  
+14  public record WeightedRatingInstitutionCompounds(double AvgRatingForInstitution, int CountRatingForInstitution);
+15  
+16  public class InstitutionService : IInstitutionService
+17  {
+18      private readonly IUnitOfWork _unitOfWork;
+19      private readonly Lazy<IMapper> _mapper;
+20  
+21      public InstitutionService(
+22          IUnitOfWork unitOfWork,
+23          Lazy<IMapper> mapper)
+24      {
+25          _unitOfWork = unitOfWork;
+26          _mapper = mapper;
+27      }
+28  
+29      public void Apply(CreateUpdateInstitutionModel institutionModel)
+30      {
+31          var institution = _mapper.Value.Map<Institution>(institutionModel);
+32          _unitOfWork.Institutions.Value.Apply(institution);
+33      }
+34  
+35      public void Delete(int institutionId)
+36      {
+37          _unitOfWork.Institutions.Value.Delete(institutionId);
+38      }
+39  
+40      public IEnumerable<InstitutionListItem> GetAll(InstitutionFilter institutionFilter, int userId)
+41      {
+42          var institutions = _unitOfWork.Institutions.Value.GetAll(institutionFilter).ToList();
+43          var institutionModels = MapInstitutionsToModels(institutions, userId);
+44  
+45          if (institutionFilter.SortByRatingAscending)
+46              return institutionModels.OrderBy(i => i.Rating.Mark).ToList();
+47          else
+48              return institutionModels.OrderByDescending(i => i.Rating.Mark).ToList();
+49      }
+50  
+51      public IEnumerable<InstitutionListItem> GetByOwnerId(int ownerId)
+52      {
+53          var institutions = _unitOfWork.Institutions.Value.GetAll().Where(i => i.OwnerId == ownerId).ToList();
+54          return MapInstitutionsToModels(institutions, ownerId);
+55      }
+56  
+57      public InstitutionModel GetById(int institutionId, int userId)
+58      {
+59          var institution = _unitOfWork.Institutions.Value.GetById(institutionId);
+60          var institutionModel = _mapper.Value.Map<InstitutionModel>(institution);
+61  
+62          if (institutionModel.InstitutionId > 0)
+63          {
+64              var avgRating = institution.Ratings?.Any() == true ? institution.Ratings.Average(r => r.Mark) : 0;
+65              institutionModel.Logo = GetLogoBase64(institution.LogoBytes);
+66              institutionModel.Rating = new RatingModel
+67              {
+68                  InstitutionId = institutionId,
+69                  Mark = avgRating,
+70                  IsSetByCurrentUser = institution.Ratings.Any(r => r.UserId == userId)
+71              };
+72          }
+73  
+74          return institutionModel;
+75      }
+76  
+77      public void SetRating(int institutionId, int userId, int mark)
+78      {
+79          _unitOfWork.Institutions.Value.SetRating(institutionId, userId, mark);
+80      }
+81  
+82      public string UploadLogo(byte[] logoBytes, int institutionId)
+83      {
+84          _unitOfWork.Institutions.Value.UploadLogo(logoBytes, institutionId);
+85          return Convert.ToBase64String(logoBytes);
+86      }
+87  
+88      public void AddFacilityToInstitution(int facilityId, int institutionId)
+89      {
+90          _unitOfWork.Institutions.Value.AddFacilityToInstitution(facilityId, institutionId);
+91      }
+92  
+93      public void RemoveFacilityFromInstitution(int facilityId, int institutionId)
+94      {
+95          _unitOfWork.Institutions.Value.RemoveFacilityFromInstitution(facilityId, institutionId);
+96      }
+97  
+98      #region Helpers 
+99  
+100      private IEnumerable<InstitutionListItem> MapInstitutionsToModels(IEnumerable<Institution> institutions, int userId)
+101      {
+102          var institutionModels = new List<InstitutionListItem>();
+103          var globalWeightedRatingCompounds = GetWeightedRatingCompounds(institutions);
+104  
+105          institutions.ToList().ForEach(i =>
+106          {
+107              var avgRating = i.Ratings?.Any() == true ? i.Ratings.Average(r => r.Mark) : 0;
+108              var ratingCount = i.Ratings?.Count() ?? 0;
+109  
+110              var institutionModel = new InstitutionListItem
+111              {
+112                  InstitutionId = i.InstitutionId,
+113                  Name = i.Name,
+114                  InstitutionTypeName = Resources.Get(i.InstitutionType.ToString().ToUpper()),
+115                  Rating = new RatingModel
+116                  {
+117                      InstitutionId = i.InstitutionId,
+118                      Mark = avgRating,
+119                      IsSetByCurrentUser = i.Ratings?.Any(r => r.UserId == userId) ?? false
+120                  },
+121                  Logo = GetLogoBase64(i.LogoBytes),
+122                  RegionName = i.Region.GetEnumDescription()
+123              };
+124  
+125              var institutionWeightedRatingCompounds = new WeightedRatingInstitutionCompounds(avgRating, ratingCount);
+126              institutionModel.WeightedRating = GetWeightedRatingForInstitution(institutionWeightedRatingCompounds, globalWeightedRatingCompounds);
+127  
+128              institutionModels.Add(institutionModel);
+129          });
+130  
+131  
+132          return institutionModels;
+133      }
+134  
+135      private WeightedRatingGlobalCompounds GetWeightedRatingCompounds(IEnumerable<Institution> institutions)
+136      {
+137          var avgRatingForSet = institutions?.Average(i => i.Ratings?.Any() == true ? i.Ratings.Average(r => r.Mark) : 0) ?? 0;
+138          var minAmountForset = institutions?.Where(i => i.Ratings?.Count() > 0).Min(i => i.Ratings?.Count() ?? 0) ?? 0;
+139  
+140          return new WeightedRatingGlobalCompounds(avgRatingForSet, minAmountForset);
+141      }
+142  
+143      private double GetWeightedRatingForInstitution(WeightedRatingInstitutionCompounds institutionCompounds, WeightedRatingGlobalCompounds globalCompounds)
+144      {
+145          double countRatingForInstitution = institutionCompounds.CountRatingForInstitution;
+146          double avgRatingForInstitution = institutionCompounds.AvgRatingForInstitution;
+147          double minCountRatingForSet = globalCompounds.MinCountRatingForSet;
+148          double avgRatingForSet = globalCompounds.AvgRatingForSet;
+149  
+150          if (countRatingForInstitution == 0 && minCountRatingForSet == 0)
+151              return default;
+152  
+153          double weightedRatingForInstitutionPart = (countRatingForInstitution * avgRatingForInstitution) / (countRatingForInstitution + minCountRatingForSet);
+154          double weightedRatingForSetPart = (minCountRatingForSet * avgRatingForSet) / (countRatingForInstitution + minCountRatingForSet);
+155  
+156          return Math.Round(weightedRatingForInstitutionPart + weightedRatingForSetPart, 2);
+157      }
+158  
+159      private string GetLogoBase64(byte[] logoBytes)
+160      {
+161          if (logoBytes != null && logoBytes.Any())
+162              return Convert.ToBase64String(logoBytes);
+163  
+164          return null;
+165      }
+166  
+167      #endregion
+168  }
+
+Код класу HashHelper.cs:
+
+1  using System.Security.Cryptography;
+2  using System.Text;
+3  
+4  namespace DAL.Infrastructure.Helpers;
+5  public record SaltAndPassword(string Salt, string PasswordHash);
+6  
+7  public static class HashHelper
+8  {
+9      private const int INTERVAL = 181081;
+10      private static readonly Random random = new((int)(DateTime.Now.Ticks % INTERVAL));
+11      private static string symbols => "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm[]'/.,{}:\"<>?`1234567890-=~!@#$%^&*()_+\\|";
+12      private static string defaultSalt => "98+_)+(_+a?}\">?\\\"kf98bvsocn01234-)(U^)QWEJOFkn9uwe0tj)ASDJF)(H0INHO$%uh09hj";
+13  
+14      private const int ITERATION_COUNT = 1000;
+15      private const int KEY_SIZE = 16;
+16      private static byte[] key = GenerateKeyFromSalt(Encoding.UTF8.GetBytes(symbols), ITERATION_COUNT, KEY_SIZE);
+17  
+18      private static byte[] GenerateKeyFromSalt(byte[] salt, int iterationCount, int keySize)
+19      {
+20          using var deriveBytes = new Rfc2898DeriveBytes(defaultSalt, salt, iterationCount, HashAlgorithmName.SHA1);
+21              return deriveBytes.GetBytes(keySize);
+22      }
+23  
+24      public static byte[] Encrypt(byte[] fileBytes)
+25      {
+26          using var aes = new AesGcm(key, AesGcm.TagByteSizes.MaxSize);
+27          var nonce = new byte[AesGcm.NonceByteSizes.MaxSize];
+28          RandomNumberGenerator.Fill(nonce);
+29  
+30          var encryptedData = new byte[fileBytes.Length];
+31          var tag = new byte[AesGcm.TagByteSizes.MaxSize];
+32  
+33          aes.Encrypt(nonce, fileBytes, encryptedData, tag);
+34  
+35          var encryptedBytes = new byte[nonce.Length + encryptedData.Length + tag.Length];
+36          Buffer.BlockCopy(nonce, 0, encryptedBytes, 0, nonce.Length);
+37          Buffer.BlockCopy(encryptedData, 0, encryptedBytes, nonce.Length, encryptedData.Length);
+38          Buffer.BlockCopy(tag, 0, encryptedBytes, nonce.Length + encryptedData.Length, tag.Length);
+39  
+40          return encryptedBytes;
+41      }
+42  
+43      public static byte[] Decrypt(byte[] encryptedBytes)
+44      {
+45          using var aes = new AesGcm(key, AesGcm.TagByteSizes.MaxSize);
+46          var nonce = new byte[AesGcm.NonceByteSizes.MaxSize];
+47          var tag = new byte[AesGcm.TagByteSizes.MaxSize];
+48          var encryptedData = new byte[encryptedBytes.Length - nonce.Length - tag.Length];
+49  
+50          Buffer.BlockCopy(encryptedBytes, 0, nonce, 0, nonce.Length);
+51          Buffer.BlockCopy(encryptedBytes, nonce.Length, encryptedData, 0, encryptedData.Length);
+52          Buffer.BlockCopy(encryptedBytes, nonce.Length + encryptedData.Length, tag, 0, tag.Length);
+53  
+54          var decryptedData = new byte[encryptedData.Length];
+55          aes.Decrypt(nonce, encryptedData, tag, decryptedData);
+56  
+57          return decryptedData;
+58      }
+59  
+60      public static SaltAndPassword GenerateNewPasswordHash(string newPassword)
+61      {
+62          const int SALT_LENGTH = 16;
+63          var salt = new string(Enumerable.Repeat(symbols, SALT_LENGTH)
+64              .Select(s => s[random.Next(s.Length)]).ToArray()
+65          );
+66  
+67          var passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword + salt + defaultSalt);
+68  
+69          return new SaltAndPassword(salt, passwordHash);
+70      }
+71  
+72      public static bool VerifyPassword(string password, string salt, string passwordHash)
+73      {
+74          return BCrypt.Net.BCrypt.Verify(password + salt + defaultSalt, passwordHash);
+75      }
+76  }
+
+Код класу DbContextBase.cs:
+
+1  using Domain.Models;
+2  using Microsoft.EntityFrameworkCore;
+3  using Microsoft.EntityFrameworkCore.ValueGeneration;
+4  
+5  namespace DAL.DbContexts;
+6  public class DbContextBase : DbContext
+7  {
+8      public DbSet<User> Users { get; set; } = null!;
+9  
+10      public DbSet<UserProfile> UserProfiles { get; set; } = null!;
+11  
+12      public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+13  
+14      public DbSet<ResetPasswordToken> ResetPasswordTokens { get; set; } = null!;
+15  
+16      public DbSet<Pet> Pets { get; set; } = null!;
+17  
+18      public DbSet<Institution> Institutions { get; set; } = null!;
+19  
+20      public DbSet<Facility> Facilities { get; set; } = null!;
+21  
+22      public DbSet<DiaryNote> DiaryNotes { get; set; } = null!;
+23  
+24      public DbSet<HealthRecord> HealthRecords { get; set; } = null!;
+25  
+26      public DbSet<Rating> Ratings { get; set; } = null!;
+27  
+28      public DbSet<Notification> Notifications { get; set; } = null!;
+29  
+30      public DbContextBase(DbContextOptions<DbContextBase> options)
+31          : base(options) {}
+32  
+33      public void Commit()
+34      {
+35          SaveChanges();
+36      }
+37  
+38      protected override void OnModelCreating(ModelBuilder modelBuilder)
+39      {
+40          MapUser(modelBuilder);
+41          MapPet(modelBuilder);
+42          MapInsitution(modelBuilder);
+43          AddAdmin(modelBuilder);
+44          MapEnums(modelBuilder);
+45  
+46          base.OnModelCreating(modelBuilder);
+47      }
+48  
+49      #region Mappings
+50  
+51      private void MapUser(ModelBuilder modelBuilder)
+52      {
+53          modelBuilder.Entity<User>()
+54              .HasKey(u => u.UserId);
+55  
+56          modelBuilder.Entity<User>()
+57              .Property(u => u.UserId)
+58              .ValueGeneratedOnAdd();
+59  
+60          modelBuilder.Entity<User>()
+61              .HasOne(u => u.UserProfile)
+62              .WithOne(p => p.User)
+63              .HasForeignKey<UserProfile>(p => p.UserId)
+64              .OnDelete(DeleteBehavior.Cascade);
+65  
+66          modelBuilder.Entity<UserProfile>()
+67              .HasKey(p => p.UserId);
+68  
+69          modelBuilder.Entity<User>()
+70              .HasMany(u => u.RefreshTokens)
+71              .WithOne(t => t.User)
+72              .OnDelete(DeleteBehavior.Cascade);
+73  
+74          modelBuilder.Entity<RefreshToken>()
+75              .Property(t => t.RefreshTokenId)
+76              .HasValueGenerator(typeof(GuidValueGenerator));
+77  
+78          modelBuilder.Entity<User>()
+79              .HasMany(u => u.ResetPasswordTokens)
+80              .WithOne(t => t.User)
+81              .OnDelete(DeleteBehavior.Cascade);
+82  
+83          modelBuilder.Entity<ResetPasswordToken>()
+84              .Property(t => t.ResetPasswordTokenId)
+85              .HasValueGenerator(typeof(GuidValueGenerator));
+86  
+87          modelBuilder.Entity<User>()
+88             .HasMany(u => u.Pets)
+89             .WithOne(p => p.Owner)
+90             .OnDelete(DeleteBehavior.Cascade);
+91  
+92          modelBuilder.Entity<User>()
+93             .HasMany(u => u.Institutions)
+94             .WithOne(i => i.Owner)
+95             .OnDelete(DeleteBehavior.Cascade);
+96  
+97          modelBuilder.Entity<User>()
+98              .HasMany(u => u.Ratings)
+99              .WithOne(r => r.User)
+100              .OnDelete(DeleteBehavior.NoAction);
+101  
+102          modelBuilder.Entity<Notification>()
+103              .Property(n => n.NotificationId)
+104              .HasValueGenerator(typeof(GuidValueGenerator));
+105  
+106          modelBuilder.Entity<User>()
+107             .HasMany(n => n.Notifications)
+108             .WithOne(u => u.User)
+109             .OnDelete(DeleteBehavior.NoAction);
+110      }
+111  
+112      private void MapInsitution(ModelBuilder modelBuilder)
+113      {
+114          modelBuilder.Entity<Institution>()
+115              .HasKey(i => i.InstitutionId);
+116  
+117          modelBuilder.Entity<Institution>()
+118              .HasMany(i => i.Facilities)
+119              .WithMany(s => s.Institutions)
+120              .UsingEntity("InstitutionFacilities");
+121  
+122          modelBuilder.Entity<Facility>()
+123              .HasKey(f => f.FacilityId);
+124  
+125          modelBuilder.Entity<Facility>()
+126              .Property(f => f.FacilityId)
+127              .ValueGeneratedOnAdd();
+128  
+129          modelBuilder.Entity<Rating>()
+130              .Property(c => c.RatingId)
+131              .HasValueGenerator(typeof(GuidValueGenerator));
+132  
+133          modelBuilder.Entity<Institution>()
+134              .HasMany(i => i.Ratings)
+135              .WithOne(r => r.Institution)
+136              .OnDelete(DeleteBehavior.Cascade);
+137      }
+138  
+139      private void MapPet(ModelBuilder modelBuilder)
+140      {
+141          modelBuilder.Entity<Pet>()
+142              .HasKey(p => p.PetId);
+143  
+144          modelBuilder.Entity<Pet>()
+145              .Property(p => p.PetId)
+146              .HasValueGenerator(typeof(GuidValueGenerator));
+147  
+148          modelBuilder.Entity<Pet>()
+149              .HasMany(p => p.DiaryNotes)
+150              .WithOne(dn => dn.Pet)
+151              .OnDelete(DeleteBehavior.Cascade);
+152  
+153          modelBuilder.Entity<Pet>()
+154              .HasMany(p => p.HealthRecords)
+155              .WithOne(hr => hr.Pet)
+156              .OnDelete(DeleteBehavior.Cascade);
+157  
+158          modelBuilder.Entity<DiaryNote>()
+159              .HasKey(dn => dn.DiaryNoteId);
+160  
+161          modelBuilder.Entity<DiaryNote>()
+162              .Property(dn => dn.DiaryNoteId)
+163              .HasValueGenerator(typeof(GuidValueGenerator));
+164  
+165          modelBuilder.Entity<HealthRecord>()
+166              .HasKey(hr => hr.HealthRecordId);
+167  
+168          modelBuilder.Entity<HealthRecord>()
+169              .Property(hr => hr.HealthRecordId)
+170              .HasValueGenerator(typeof(GuidValueGenerator));
+171  
+172          modelBuilder.Entity<Pet>()
+173             .HasMany(p => p.Notifications)
+174             .WithOne(n => n.Pet)
+175             .OnDelete(DeleteBehavior.SetNull);
+176      }
+177  
+178      private void MapEnums(ModelBuilder modelBuilder)
+179      {
+180          modelBuilder.Entity<Institution>()
+181              .Property(i => i.InstitutionType)
+182              .HasConversion<int>();
+183  
+184          modelBuilder.Entity<Pet>()
+185              .Property(p => p.PetType)
+186              .HasConversion<int>();
+187  
+188          modelBuilder.Entity<User>()
+189              .Property(u => u.Role)
+190              .HasConversion<int>();
+191  
+192          modelBuilder.Entity<UserProfile>()
+193              .Property(u => u.Gender)
+194              .HasConversion<int>();
+195  
+196          modelBuilder.Entity<UserProfile>()
+197              .Property(u => u.Region)
+198              .HasConversion<int>();
+199      }
+200  
+201      private void AddAdmin(ModelBuilder modelBuilder)
+202      {
+203          modelBuilder.Entity<User>().HasData(new User
+204          {
+205              UserId = 1,
+206              Login = "Admin",
+207              PasswordHash = "$2a$10$WkrWKFdubfRwcY4MjdFELui7Dh8r3ykAvDYOQPvQud0vPlxFHVen.", // password: admin231_rte
+208              PasswordSalt = "d!W2~4~zI{wq:l<p",
+209              RegisteredOnUtc = DateTime.UtcNow,
+210              Role = Common.Enums.Role.Admin
+211          });
+212  
+213          modelBuilder.Entity<UserProfile>().HasData(new UserProfile
+214          {
+215              UserId = 1,
+216              Email = "admin@pawpoint.com"
+217          });
+218      }
+219  
+220      #endregion
+221  }
+
