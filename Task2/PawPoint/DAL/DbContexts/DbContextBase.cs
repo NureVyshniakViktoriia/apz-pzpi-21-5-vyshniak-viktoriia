@@ -28,7 +28,10 @@ public class DbContextBase : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
 
     public DbContextBase(DbContextOptions<DbContextBase> options)
-        : base(options) {}
+        : base(options) 
+    {
+        Database.EnsureCreated();
+    }
 
     public void Commit()
     {
