@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace WebAPI.Controllers;
-
 [Area("arduino")]
 [Route("api/[area]")]
 [ApiController]

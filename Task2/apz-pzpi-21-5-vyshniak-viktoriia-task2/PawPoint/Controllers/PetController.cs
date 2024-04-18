@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace WebAPI.Controllers;
-
 [Area("pet")]
 [Route("api/[area]")]
 [ApiController]

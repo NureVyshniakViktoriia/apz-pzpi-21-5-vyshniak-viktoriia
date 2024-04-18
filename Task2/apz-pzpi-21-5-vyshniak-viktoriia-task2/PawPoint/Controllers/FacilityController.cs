@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
-
 [Area("facility")]
 [Route("api/[area]")]
 [ApiController]

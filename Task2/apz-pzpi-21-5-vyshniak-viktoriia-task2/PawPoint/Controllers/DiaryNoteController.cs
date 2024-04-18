@@ -9,7 +9,6 @@ using WebAPI.Infrastructure.Extensions;
 using WebAPI.Infrastructure.Models;
 
 namespace WebAPI.Controllers;
-
 [Area("diary-note")]
 [Route("api/[area]")]
 [ApiController]
