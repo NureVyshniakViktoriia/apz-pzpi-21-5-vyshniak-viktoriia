@@ -67,7 +67,7 @@ public class InstitutionController : ControllerBase
 
     [HttpGet("list")]
     [Authorize]
-    public ActionResult List([FromBody] InstitutionFilter institutionFilter)
+    public ActionResult List([FromQuery] InstitutionFilter institutionFilter)
     {
         var currentUserId = this.GetCurrentUserId();
         var institutions = _institutionService.GetAll(institutionFilter, currentUserId);

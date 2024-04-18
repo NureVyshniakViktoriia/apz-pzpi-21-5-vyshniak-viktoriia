@@ -18,7 +18,7 @@ public class HealthRecordController : ControllerBase
     }
 
     [HttpGet("get-health-records")]
-    public ActionResult GetAllHealthRecords([FromBody] HealthRecordFilter recordFilter)
+    public ActionResult GetAllHealthRecords([FromQuery] HealthRecordFilter recordFilter)
     {
         var healthRecords = _healthRecordService.GetAllHealthRecords(recordFilter);
 
@@ -26,7 +26,7 @@ public class HealthRecordController : ControllerBase
     }
 
     [HttpGet("get-health-record-statistics")]
-    public ActionResult GetHealthRecordStatistics([FromBody] HealthRecordFilter recordFilter)
+    public ActionResult GetHealthRecordStatistics([FromQuery] HealthRecordFilter recordFilter)
     {
         var healthRecords = _healthRecordService.GetHealthRecordStatistics(recordFilter);
 

@@ -156,7 +156,7 @@ do-db-backup	POST				Ok, Unauthorized, Forbidden
 Таблиця 5 – Ендпоінти контролеру HealthRecordController
 Дія	Метод	Параметр	Відповіді
 		Джерело	Назва	Тип	
-get-health-records	POST	FromBody	petId	Guid	Ok, Bad Request, Unauthorized
+get-health-records	GET	FromQuery	petId	Guid	Ok, Bad Request, Unauthorized
 			startDate	DateTime?	
 			endDate	DateTime?	
 get-health-record-statistics	GET	FromQuery	petId	Guid	Ok, Bad Request, Unauthorized, Forbidden
@@ -180,7 +180,7 @@ delete	DELETE	FromQuery	institutionId	int	Ok, Bad Request, UnauthorizedForbidden
 set-rating	POST	FromBody	institutionId	int	Ok, Unauthorized, Bad Request
 			userId	int	
 			mark	int	
-list	GET	FromBody	searchQuery	string	Ok, Unauthorized Bad Request
+list	GET	FromQuery	searchQuery	string	Ok, Unauthorized Bad Request
 			pageSize	int	
 			pageCount	int	
 			institutionType	Institution-Type?	
