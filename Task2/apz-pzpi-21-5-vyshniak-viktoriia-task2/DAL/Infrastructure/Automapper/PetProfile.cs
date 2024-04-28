@@ -9,7 +9,9 @@ public class PetProfile : Profile
     {
         CreateMap<Pet, Pet>();
 
-        CreateMap<DiaryNote, DiaryNote>();
+        CreateMap<DiaryNote, DiaryNote>()
+            .ForMember(dest => dest.CreatedOnUtc,
+                opt => opt.Ignore()); ;
 
         CreateMap<DiaryNote, DocumentDataModel>();
 

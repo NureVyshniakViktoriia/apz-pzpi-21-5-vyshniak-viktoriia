@@ -96,7 +96,7 @@ public class InstitutionController : ControllerBase
     }
 
     [HttpPost("add-facility-institution")]
-    public ActionResult AddPositionToBill([FromBody] AddFacilityToInstitutionModel facilityToInstitutionModel)
+    public ActionResult AddFacilityToInstitution([FromBody] AddFacilityToInstitutionModel facilityToInstitutionModel)
     {
         _institutionService.AddFacilityToInstitution(facilityToInstitutionModel.FacilityId, facilityToInstitutionModel.InstitutionId);
 
@@ -104,10 +104,19 @@ public class InstitutionController : ControllerBase
     }
 
     [HttpPost("remove-facility-institution")]
-    public ActionResult RemovePositionFromBill([FromBody] RemoveFacilityFromInstitution removeFacilityFromInstitution)
+    public ActionResult RemoveFacilityFromInstitution([FromBody] RemoveFacilityFromInstitution removeFacilityFromInstitution)
     {
         _institutionService.RemoveFacilityFromInstitution(removeFacilityFromInstitution.FacilityId, removeFacilityFromInstitution.InstitutionId);
 
         return Ok();
+    }
+
+    [HttpGet("get-rfid-settings-by-id")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult GetRFIDSettingsById([FromQuery] int institutionId)
+    {
+        var rfidSettingsModel = _institutionService.GetRFIDSettingsByInstitutionId(institutionId);
+
+        return Ok(rfidSettingsModel);
     }
 }

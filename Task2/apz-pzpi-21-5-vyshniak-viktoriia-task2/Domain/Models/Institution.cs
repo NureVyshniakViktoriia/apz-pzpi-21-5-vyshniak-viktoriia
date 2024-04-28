@@ -43,6 +43,9 @@ public class Institution
     public User Owner { get; set; }
 
     [JsonIgnore]
+    public RFIDSettings RFIDSettings { get; set; }
+
+    [JsonIgnore]
     public ICollection<Facility> Facilities { get; set; }
 
     [JsonIgnore]

@@ -17,10 +17,10 @@ public class Pet
     public string NickName { get; set;}
 
     [Required(ErrorMessage = "REQUIRED_FIELD")]
-    public PetType PetType { get; set;}
+    public PetType PetType { get; set; } = PetType.Cat;
 
     [Required(ErrorMessage = "REQUIRED_FIELD")]
-    public DateTime BirthDate { get; set;}
+    public DateTime BirthDate { get; set;} = DateTime.UtcNow;
 
     public string Breed { get; set;} = string.Empty;
 
@@ -47,6 +47,9 @@ public class Pet
 
     [JsonIgnore]
     public User Owner { get; set; }
+
+    [JsonIgnore]
+    public ArduinoSettings ArduinoSettings { get; set; }
 
     [JsonIgnore]
     public ICollection<DiaryNote> DiaryNotes { get; set; }

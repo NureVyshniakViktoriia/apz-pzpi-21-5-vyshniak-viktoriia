@@ -29,10 +29,23 @@ public class FacilityService : IFacilityService
         _unitOfWork.Facilities.Value.Delete(facilityId);
     }
 
-    public IEnumerable<FacilityListItem> GetAll()
+    public IEnumerable<FacilityListItem> GetAll(int? institutionId)
     {
         var facilities = _unitOfWork.Facilities.Value.GetAll();
         var facilityModels = _mapper.Value.Map<List<FacilityListItem>>(facilities);
+
+        if (institutionId is not null)
+        {
+            facilityModels.ToList().ForEach(facilityModel =>
+            {
+                var isForInstitution = facilities
+                    .Any(f => f.FacilityId == facilityModel.FacilityId
+                        && f.Institutions.Any(i => i.InstitutionId == institutionId)
+                );
+
+                facilityModel.IsForInstitution = isForInstitution;
+            });
+        }
 
         return facilityModels;
     }

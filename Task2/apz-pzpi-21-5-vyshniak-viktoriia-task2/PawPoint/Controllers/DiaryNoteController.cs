@@ -57,7 +57,7 @@ public class DiaryNoteController : ControllerBase
     }
 
     [HttpPost("upload-document")]
-    public async Task<ActionResult> UploadMenu([FromForm] UploadDocumentFileModel uploadModel)
+    public async Task<ActionResult> UploadDocument([FromForm] UploadDocumentFileModel uploadModel)
     {
         if (uploadModel.File == null || uploadModel.File.Length == 0)
             return BadRequest(Resources.Get("EMPTY_FILE"));

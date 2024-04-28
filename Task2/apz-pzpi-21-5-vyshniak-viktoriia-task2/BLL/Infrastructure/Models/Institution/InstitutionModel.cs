@@ -1,4 +1,5 @@
-﻿using BLL.Infrastructure.Models.Facility;
+﻿using BLL.Infrastructure.Models.Arduino;
+using BLL.Infrastructure.Models.Facility;
 using Common.Enums;
 
 namespace BLL.Infrastructure.Models.Institution;
@@ -31,4 +32,6 @@ public class InstitutionModel
     public string WebsiteUrl { get; set; }
 
     public IEnumerable<FacilityListItem> Facilities { get; set; }
+
+    public RFIDSettingsModel RFIDSettings { get; set; }
 }

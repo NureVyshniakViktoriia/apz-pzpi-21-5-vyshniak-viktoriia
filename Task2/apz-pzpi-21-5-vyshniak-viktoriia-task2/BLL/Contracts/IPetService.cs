@@ -1,4 +1,5 @@
-﻿using BLL.Infrastructure.Models.Pet;
+﻿using BLL.Infrastructure.Models.Arduino;
+using BLL.Infrastructure.Models.Pet;
 
 namespace BLL.Contracts;
 public interface IPetService
@@ -9,5 +10,11 @@ public interface IPetService
 
     PetModel GetById(Guid petId);
 
+    PetModel GetByRFID(string petRFID);
+
     IEnumerable<PetListItem> GetAllByOwnerId(int ownerId);
+
+    IEnumerable<PetListItem> GetAll();
+
+    ArduinoSettingsModel GetArduinoSettingsByPetId(Guid petId);
 }

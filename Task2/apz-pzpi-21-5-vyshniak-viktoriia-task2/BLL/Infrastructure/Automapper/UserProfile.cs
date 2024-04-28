@@ -15,12 +15,10 @@ public class UserProfile : Profile
             .ForMember(dst => dst.Region,
                 opt => opt.MapFrom(src => src.UserProfile.Region))
             .ForMember(dst => dst.RegisteredOnUtc,
-                opt => opt.MapFrom(src => src.RegisteredOnUtc.ToShortDateString()))
+                opt => opt.MapFrom(src => src.RegisteredOnUtc.Date))
             .ReverseMap();
 
         CreateMap<User, UserModel>()
-            .ForMember(dst => dst.RegisteredOnUtc,
-                opt => opt.MapFrom(src => src.RegisteredOnUtc.ToShortDateString()))
             .ReverseMap();
     }
 }

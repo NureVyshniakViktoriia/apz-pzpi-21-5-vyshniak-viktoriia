@@ -19,9 +19,15 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public void Create(CreateNotificationModel notificationModel)
+        public void Create(int adminId, string petRFID)
         {
-            var notification = _mapper.Value.Map<Notification>(notificationModel);
+            var pet = _unitOfWork.Pets.Value.GetByRFID(petRFID);
+            var notification = new Notification
+            {
+                PetId = pet.PetId,
+                UserId = adminId,
+            };
+
             _unitOfWork.Notifications.Value.Create(notification);
         }
 

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BLL.Contracts;
+using BLL.Infrastructure.Models.Arduino;
 using BLL.Infrastructure.Models.Pet;
 using DAL.UnitOfWork;
 using Domain.Models;
@@ -29,6 +30,14 @@ public class PetService : IPetService
         _unitOfWork.Pets.Value.Delete(petId);
     }
 
+    public IEnumerable<PetListItem> GetAll()
+    {
+        var pets = _unitOfWork.Pets.Value.GetAll();
+        var petModels = _mapper.Value.Map<List<PetListItem>>(pets);
+
+        return petModels;
+    }
+
     public IEnumerable<PetListItem> GetAllByOwnerId(int ownerId)
     {
         var pets = _unitOfWork.Pets.Value.GetAllByOwnerId(ownerId);
@@ -37,9 +46,25 @@ public class PetService : IPetService
         return petModels;
     }
 
+    public ArduinoSettingsModel GetArduinoSettingsByPetId(Guid petId)
+    {
+        var settings = _unitOfWork.Pets.Value.GetArduinoSettingsByPetId(petId);
+        var settingsModel = _mapper.Value.Map<ArduinoSettingsModel>(settings);
+
+        return settingsModel;
+    }
+
     public PetModel GetById(Guid petId)
     {
         var pet = _unitOfWork.Pets.Value.GetById(petId);
+        var petModel = _mapper.Value.Map<PetModel>(pet);
+
+        return petModel;
+    }
+
+    public PetModel GetByRFID(string petRFID)
+    {
+        var pet = _unitOfWork.Pets.Value.GetByRFID(petRFID);
         var petModel = _mapper.Value.Map<PetModel>(pet);
 
         return petModel;

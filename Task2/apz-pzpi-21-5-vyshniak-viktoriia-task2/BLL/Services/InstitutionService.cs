@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BLL.Contracts;
+using BLL.Infrastructure.Models.Arduino;
 using BLL.Infrastructure.Models.Institution;
 using Common.Extensions;
 using Common.Resources;
@@ -66,7 +67,7 @@ public class InstitutionService : IInstitutionService
             institutionModel.Rating = new RatingModel
             {
                 InstitutionId = institutionId,
-                Mark = avgRating,
+                Mark = Math.Round(avgRating, 2),
                 IsSetByCurrentUser = institution.Ratings.Any(r => r.UserId == userId)
             };
         }
@@ -95,11 +96,27 @@ public class InstitutionService : IInstitutionService
         _unitOfWork.Institutions.Value.RemoveFacilityFromInstitution(facilityId, institutionId);
     }
 
+    public void SetRFIDReaderIp(int rfidSettingsId, string ipAddress)
+    {
+        _unitOfWork.Institutions.Value.SetRFIDReaderIp(rfidSettingsId, ipAddress);
+    }
+
+    public RFIDSettingsModel GetRFIDSettingsByInstitutionId(int institutionId)
+    {
+        var rfidSettings = _unitOfWork.Institutions.Value.GetRFIDSettingsByInstitutionId(institutionId);
+        var rfidSettingsModel = _mapper.Value.Map<RFIDSettingsModel>(rfidSettings);
+
+        return rfidSettingsModel;
+    }
+
     #region Helpers 
 
     private IEnumerable<InstitutionListItem> MapInstitutionsToModels(IEnumerable<Institution> institutions, int userId)
     {
         var institutionModels = new List<InstitutionListItem>();
+        if (institutions == null || !institutions.Any())
+            return institutionModels;
+
         var globalWeightedRatingCompounds = GetWeightedRatingCompounds(institutions);
 
         institutions.ToList().ForEach(i =>
@@ -111,15 +128,15 @@ public class InstitutionService : IInstitutionService
             {
                 InstitutionId = i.InstitutionId,
                 Name = i.Name,
-                InstitutionTypeName = Resources.Get(i.InstitutionType.ToString().ToUpper()),
+                InstitutionType = i.InstitutionType,
                 Rating = new RatingModel
                 {
                     InstitutionId = i.InstitutionId,
-                    Mark = avgRating,
+                    Mark = Math.Round(avgRating, 2),
                     IsSetByCurrentUser = i.Ratings?.Any(r => r.UserId == userId) ?? false
                 },
                 Logo = GetLogoBase64(i.LogoBytes),
-                RegionName = i.Region.GetEnumDescription()
+                Region = i.Region
             };
 
             var institutionWeightedRatingCompounds = new WeightedRatingInstitutionCompounds(avgRating, ratingCount);

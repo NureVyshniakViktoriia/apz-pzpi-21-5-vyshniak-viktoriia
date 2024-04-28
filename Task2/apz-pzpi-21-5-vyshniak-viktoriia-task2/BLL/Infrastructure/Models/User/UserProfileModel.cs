@@ -13,7 +13,7 @@ public class UserProfileModel
 
     public string Login { get; set; }
 
-    public string RegisteredOnUtc { get; set; }
+    public DateTime RegisteredOnUtc { get; set; }
 
     public Role Role { get; set; }
 }

@@ -23,4 +23,8 @@ public interface IInstitutionRepository
     void AddFacilityToInstitution(int facilityId, int institutionId);
 
     void RemoveFacilityFromInstitution(int facilityId, int institutionId);
+
+    void SetRFIDReaderIp(int rfidSettingsId, string ipAddress);
+
+    RFIDSettings GetRFIDSettingsByInstitutionId(int institutionId);
 }

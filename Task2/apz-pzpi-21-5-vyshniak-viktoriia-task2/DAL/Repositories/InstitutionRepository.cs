@@ -16,6 +16,7 @@ public class InstitutionRepository : IInstitutionRepository
     private readonly DbSet<User> _users;
     private readonly DbSet<Rating> _ratings;
     private readonly DbSet<Facility> _facilities;
+    private readonly DbSet<RFIDSettings> _rfIDSettings;
 
     public InstitutionRepository(
         DbContextBase dbContext,
@@ -28,6 +29,7 @@ public class InstitutionRepository : IInstitutionRepository
         _users = dbContext.Users;
         _ratings = dbContext.Ratings;
         _facilities = dbContext.Facilities;
+        _rfIDSettings = dbContext.RFIDSettings;
     }
 
     public void Apply(Institution institution)
@@ -41,8 +43,13 @@ public class InstitutionRepository : IInstitutionRepository
             dbInstitution = _mapper.Value.Map(institution, dbInstitution);
             if (!isForEdit)
             {
-                _institutions.Add(institution);
+                _institutions.Add(dbInstitution);
                 _dbContext.Commit();
+
+                _rfIDSettings.Add(new RFIDSettings
+                {
+                    InstitutionId = dbInstitution.InstitutionId,
+                });
             }
 
             _dbContext.Commit();
@@ -153,5 +160,24 @@ public class InstitutionRepository : IInstitutionRepository
 
         insitution.Facilities.Remove(facility);
         _dbContext.Commit();
+    }
+
+    public void SetRFIDReaderIp(int rfidSettingsId, string ipAddress)
+    {
+        var rfidSettings = _rfIDSettings.FirstOrDefault(rs => rs.InstitutionId == rfidSettingsId)
+            ?? throw new ArgumentException();
+
+        rfidSettings.RFIDReaderIpAddress = ipAddress;
+        _dbContext.Commit();
+    }
+
+    public RFIDSettings GetRFIDSettingsByInstitutionId(int institutionId)
+    {
+        var institution = _institutions
+            .Include(r => r.RFIDSettings)
+            .FirstOrDefault(i => i.InstitutionId == institutionId)
+                ?? throw new ArgumentException(Resources.Get("INSTITUTION_NOT_FOUND"));
+
+        return institution.RFIDSettings;
     }
 }

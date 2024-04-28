@@ -9,5 +9,11 @@ public interface IPetRepository
 
     Pet GetById(Guid petId);
 
+    Pet GetByRFID(string petRFID);
+
     IQueryable<Pet> GetAllByOwnerId(int ownerId);
+
+    IQueryable<Pet> GetAll();
+
+    ArduinoSettings GetArduinoSettingsByPetId(Guid petId);
 }

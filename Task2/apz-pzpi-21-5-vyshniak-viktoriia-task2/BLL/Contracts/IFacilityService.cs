@@ -9,7 +9,7 @@ public interface IFacilityService
 
     FacilityModel GetById(int facilityId);
 
-    IEnumerable<FacilityListItem> GetAll();
+    IEnumerable<FacilityListItem> GetAll(int? institutionId);
 
     IEnumerable<FacilityListItem> GetAllByInstitutionId(int institutionId);
 }

@@ -7,7 +7,6 @@ namespace WebAPI.Controllers;
 [Area("facility")]
 [Route("api/[area]")]
 [ApiController]
-[Authorize(Roles = "Admin")]
 public class FacilityController : ControllerBase
 {
     private readonly IFacilityService _facilityService;
@@ -18,6 +17,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpPost("apply")]
+    [Authorize(Roles = "Admin")]
     public ActionResult Apply([FromBody] CreateUpdateFacilityModel facilityModel)
     {
         if (!ModelState.IsValid)
@@ -29,6 +29,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpDelete("delete")]
+    [Authorize(Roles = "Admin")]
     public ActionResult Delete([FromQuery] int facilityId)
     {
         _facilityService.Delete(facilityId);
@@ -37,6 +38,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpGet("get-facility-by-id")]
+    [Authorize(Roles = "Admin")]
     public ActionResult GetById([FromQuery] int facilityId)
     {
         var facility = _facilityService.GetById(facilityId);
@@ -45,14 +47,16 @@ public class FacilityController : ControllerBase
     }
 
     [HttpGet("get-all")]
-    public ActionResult GetAll()
+    [Authorize]
+    public ActionResult GetAll(int? institutionId)
     {
-        var facilities = _facilityService.GetAll();
+        var facilities = _facilityService.GetAll(institutionId);
 
         return Ok(facilities);
     }
 
     [HttpGet("get-all-by-institution-id")]
+    [Authorize]
     public ActionResult GetAllByInstitutionId([FromQuery] int institutionId)
     {
         var facilities = _facilityService.GetAllByInstitutionId(institutionId);

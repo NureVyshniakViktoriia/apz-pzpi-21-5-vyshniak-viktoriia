@@ -1,5 +1,7 @@
-﻿using BLL.Infrastructure.Models.Institution;
+﻿using BLL.Infrastructure.Models.Arduino;
+using BLL.Infrastructure.Models.Institution;
 using DAL.Infrastructure.Models.Filters;
+using Domain.Models;
 
 namespace BLL.Contracts;
 public interface IInstitutionService
@@ -21,4 +23,8 @@ public interface IInstitutionService
     void AddFacilityToInstitution(int facilityId, int institutionId);
 
     void RemoveFacilityFromInstitution(int facilityId, int institutionId);
+
+    void SetRFIDReaderIp(int rfidSettingsId, string ipAddress);
+
+    RFIDSettingsModel GetRFIDSettingsByInstitutionId(int institutionId);
 }

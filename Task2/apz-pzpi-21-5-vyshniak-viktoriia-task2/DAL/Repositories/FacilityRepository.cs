@@ -59,7 +59,7 @@ public class FacilityRepository : IFacilityRepository
 
     public IQueryable<Facility> GetAll()
     {
-        return _facilities.AsQueryable();
+        return _facilities.Include(f => f.Institutions).AsQueryable();
     }
 
     public Facility GetById(int facilityId)

@@ -1,4 +1,6 @@
-﻿namespace BLL.Infrastructure.Models.Institution;
+﻿using Common.Enums;
+
+namespace BLL.Infrastructure.Models.Institution;
 public class InstitutionListItem
 {
     public int InstitutionId { get; set; }
@@ -9,9 +11,9 @@ public class InstitutionListItem
 
     public double WeightedRating { get; set; }
 
-    public string InstitutionTypeName { get; set; }
+    public InstitutionType InstitutionType { get; set; }
 
-    public string RegionName { get; set; }
+    public Region Region { get; set; }
 
     public string Logo { get; set; }
 }

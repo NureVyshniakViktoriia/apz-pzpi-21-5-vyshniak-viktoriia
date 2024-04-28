@@ -9,5 +9,5 @@ public class UserModel
 
     public string Login { get; set; }
 
-    public string RegisteredOnUtc { get; set; }
+    public DateTime RegisteredOnUtc { get; set; }
 }

@@ -10,7 +10,8 @@ public class UnitOfWork : IUnitOfWork
         Lazy<IInstitutionRepository> institutions,
         Lazy<IFacilityRepository> facilities,
         Lazy<IHealthRecordRepository> healthRecords,
-        Lazy<INotificationRepository> notifications)
+        Lazy<INotificationRepository> notifications,
+        Lazy<IArduinoSettingsRepository> arduinoSettings)
     {
         Users = users;
         Pets = pets;
@@ -19,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
         Facilities = facilities;
         HealthRecords = healthRecords;
         Notifications = notifications;
+        ArduinoSettings = arduinoSettings;
     }
 
     public Lazy<IUserRepository> Users { get; }
@@ -34,4 +36,6 @@ public class UnitOfWork : IUnitOfWork
     public Lazy<IHealthRecordRepository> HealthRecords { get; }
 
     public Lazy<INotificationRepository> Notifications { get; }
+
+    public Lazy<IArduinoSettingsRepository> ArduinoSettings { get; }
 }

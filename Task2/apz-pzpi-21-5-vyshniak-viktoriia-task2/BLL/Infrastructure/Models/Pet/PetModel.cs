@@ -1,4 +1,5 @@
-﻿using BLL.Infrastructure.Models.DiaryNote;
+﻿using BLL.Infrastructure.Models.Arduino;
+using BLL.Infrastructure.Models.DiaryNote;
 using BLL.Infrastructure.Models.HealthRecord;
 using Common.Enums;
 
@@ -32,4 +33,6 @@ public class PetModel
     public IEnumerable<HealthRecordModel> HealthRecords { get; set; }
 
     public IEnumerable<DiaryNoteListItem> DiaryNotes { get; set; }
+
+    public ArduinoSettingsModel ArduinoSettings { get; set; }
 }

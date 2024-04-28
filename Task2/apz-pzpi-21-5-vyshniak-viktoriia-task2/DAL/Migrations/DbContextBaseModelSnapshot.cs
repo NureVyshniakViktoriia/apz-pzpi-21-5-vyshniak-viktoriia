@@ -22,6 +22,19 @@ namespace DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Models.ArduinoSettings", b =>
+                {
+                    b.Property<Guid>("PetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PetDeviceIpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PetId");
+
+                    b.ToTable("ArduinoSettings");
+                });
+
             modelBuilder.Entity("Domain.Models.DiaryNote", b =>
                 {
                     b.Property<Guid>("DiaryNoteId")
@@ -225,6 +238,19 @@ namespace DAL.Migrations
                     b.ToTable("Pets");
                 });
 
+            modelBuilder.Entity("Domain.Models.RFIDSettings", b =>
+                {
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RFIDReaderIpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("InstitutionId");
+
+                    b.ToTable("RFIDSettings");
+                });
+
             modelBuilder.Entity("Domain.Models.Rating", b =>
                 {
                     b.Property<Guid>("RatingId")
@@ -329,7 +355,7 @@ namespace DAL.Migrations
                             Login = "Admin",
                             PasswordHash = "$2a$10$WkrWKFdubfRwcY4MjdFELui7Dh8r3ykAvDYOQPvQud0vPlxFHVen.",
                             PasswordSalt = "d!W2~4~zI{wq:l<p",
-                            RegisteredOnUtc = new DateTime(2024, 4, 14, 11, 8, 25, 464, DateTimeKind.Utc).AddTicks(998),
+                            RegisteredOnUtc = new DateTime(2024, 4, 27, 14, 19, 22, 801, DateTimeKind.Utc).AddTicks(4888),
                             Role = 2
                         });
                 });
@@ -357,7 +383,7 @@ namespace DAL.Migrations
                         new
                         {
                             UserId = 1,
-                            Email = "admin@restogen.com",
+                            Email = "admin@pawpoint.com",
                             Gender = 2,
                             Region = 8
                         });
@@ -376,6 +402,17 @@ namespace DAL.Migrations
                     b.HasIndex("InstitutionsInstitutionId");
 
                     b.ToTable("InstitutionFacilities");
+                });
+
+            modelBuilder.Entity("Domain.Models.ArduinoSettings", b =>
+                {
+                    b.HasOne("Domain.Models.Pet", "Pet")
+                        .WithOne("ArduinoSettings")
+                        .HasForeignKey("Domain.Models.ArduinoSettings", "PetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
                 });
 
             modelBuilder.Entity("Domain.Models.DiaryNote", b =>
@@ -438,6 +475,17 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Domain.Models.RFIDSettings", b =>
+                {
+                    b.HasOne("Domain.Models.Institution", "Institution")
+                        .WithOne("RFIDSettings")
+                        .HasForeignKey("Domain.Models.RFIDSettings", "InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Institution");
                 });
 
             modelBuilder.Entity("Domain.Models.Rating", b =>
@@ -508,11 +556,15 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("Domain.Models.Institution", b =>
                 {
+                    b.Navigation("RFIDSettings");
+
                     b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("Domain.Models.Pet", b =>
                 {
+                    b.Navigation("ArduinoSettings");
+
                     b.Navigation("DiaryNotes");
 
                     b.Navigation("HealthRecords");

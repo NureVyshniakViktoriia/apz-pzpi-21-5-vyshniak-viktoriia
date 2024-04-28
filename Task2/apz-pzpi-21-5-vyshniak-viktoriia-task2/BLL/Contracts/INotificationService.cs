@@ -3,7 +3,7 @@
 namespace BLL.Contracts;
 public interface INotificationService
 {
-    void Create(CreateNotificationModel notificationModel);
+    void Create(int adminId, string petRFID);
 
     IEnumerable<NotificationListItem> GetAllByUserId(int userId);
 

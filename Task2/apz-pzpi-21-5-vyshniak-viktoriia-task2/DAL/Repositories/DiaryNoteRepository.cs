@@ -36,8 +36,8 @@ public class DiaryNoteRepository : IDiaryNoteRepository
             dbDiaryNote = _mapper.Value.Map(diaryNote, dbDiaryNote);
             if (!isForEdit)
             {
-                diaryNote.CreatedOnUtc = DateTime.UtcNow;
-                _diaryNotes.Add(diaryNote);
+                dbDiaryNote.CreatedOnUtc = DateTime.UtcNow;
+                _diaryNotes.Add(dbDiaryNote);
                 _dbContext.Commit();
             }
 

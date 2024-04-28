@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using WebAPI.Infrastructure.Models;
 
 namespace WebAPI.Controllers;
 [Area("notification")]
@@ -31,5 +32,14 @@ public class NotificationController : ControllerBase
         var notification = _notificationService.GetById(notificationId);
 
         return Ok(notification);
+    }
+
+    [HttpPost("notify-admin")]
+    [AllowAnonymous]
+    public ActionResult NotifyAdmin([FromBody] NotifyAdminModel notifyAdminModel)
+    {
+        _notificationService.Create(notifyAdminModel.UserId, notifyAdminModel.PetRFID);
+
+        return Ok();
     }
 }

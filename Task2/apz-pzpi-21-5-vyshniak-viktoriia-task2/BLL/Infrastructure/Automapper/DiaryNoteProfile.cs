@@ -18,6 +18,8 @@ public class DiaryNoteProfile : Profile
             .ForMember(dest => dest.Document,
                 opt => opt.MapFrom(src => PdfHelper.GetPdfMemoryStreamFromBytes(src.FileBytes)));
 
-        CreateMap<CreateUpdateDiaryNoteModel, DiaryNote>();
+        CreateMap<CreateUpdateDiaryNoteModel, DiaryNote>()
+            .ForMember(dest => dest.CreatedOnUtc,
+                opt => opt.Ignore());
     }
 }

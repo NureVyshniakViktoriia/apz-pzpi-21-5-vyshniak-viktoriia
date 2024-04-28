@@ -27,6 +27,10 @@ public class DbContextBase : DbContext
 
     public DbSet<Notification> Notifications { get; set; } = null!;
 
+    public DbSet<RFIDSettings> RFIDSettings { get; set; } = null!;
+
+    public DbSet<ArduinoSettings> ArduinoSettings { get; set; } = null!;
+
     public DbContextBase(DbContextOptions<DbContextBase> options)
         : base(options) 
     {
@@ -137,6 +141,15 @@ public class DbContextBase : DbContext
             .HasMany(i => i.Ratings)
             .WithOne(r => r.Institution)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Institution>()
+            .HasOne(t => t.RFIDSettings)
+            .WithOne(r => r.Institution)
+            .HasForeignKey<RFIDSettings>(r => r.InstitutionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RFIDSettings>()
+            .HasKey(r => r.InstitutionId);
     }
 
     private void MapPet(ModelBuilder modelBuilder)
@@ -176,6 +189,15 @@ public class DbContextBase : DbContext
            .HasMany(p => p.Notifications)
            .WithOne(n => n.Pet)
            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Pet>()
+           .HasOne(p => p.ArduinoSettings)
+           .WithOne(s => s.Pet)
+           .HasForeignKey<ArduinoSettings>(s => s.PetId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ArduinoSettings>()
+            .HasKey(s => s.PetId);
     }
 
     private void MapEnums(ModelBuilder modelBuilder)

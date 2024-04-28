@@ -16,4 +16,6 @@ public interface IUnitOfWork
     Lazy<IHealthRecordRepository> HealthRecords { get; }
 
     Lazy<INotificationRepository> Notifications { get; }
+
+    Lazy<IArduinoSettingsRepository> ArduinoSettings { get; }
 }
