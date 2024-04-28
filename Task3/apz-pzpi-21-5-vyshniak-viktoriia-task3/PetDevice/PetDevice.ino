@@ -15,8 +15,8 @@
 
 #pragma region Constants
 
-String ssid = "MikroTik";
-String password = "nata1969";
+String ssid = "";
+String password = "";
 
 String jsonString = "";
 

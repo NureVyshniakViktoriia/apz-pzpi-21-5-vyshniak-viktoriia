@@ -300,6 +300,7 @@ void loop() {
           break;
       }
   }
+  
   if (WiFi.status() == WL_CONNECTED) {
       MDNS.update();
       processTag();
