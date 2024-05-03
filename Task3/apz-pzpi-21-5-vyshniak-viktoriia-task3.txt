@@ -1,0 +1,624 @@
+1 АРХІТЕКТУРА ТА ОПИС ПРОГРАМНИХ ЗАСОБІВ
+
+IoT-частина «Програмної системи для контролю за місцезнаходженням і здоров’ям тварин та зручності відвідування закладів пет-френдлі» реалізується за допомогою платформи Arduino, середовища розробки Arduino IDE та мови програмування C++.
+Для підключення до системи використовується модуль Wi-Fi, а процес взаємодії відбувається через HTTP-запити.
+Для реалізації функціоналу зчитування RFID-міток з ошийнику тварини був задіяний Wi-Fi модуль NodeMCU V3 ESP8266 (CH340) та RFID-модуль RC522. Конфігурація пристрою відбувається через COM-порт, а спілкування пристрою з сервером – з використанням протоколу HTTPS у мережі Wi-Fi.
+Для реалізації розумного пристрою для отримання показників здоров’я тварини був задіяний Wi-Fi модуль NodeMCU V3 ESP8266 (CH340) , датчик температури з аналоговим виходом NTC-10 та модуль GPS NEO-6M. Конфігурація пристрою відбувається через COM-порт, а спілкування пристрою з сервером – із використанням протоколу HTTPS у мережі Wi-Fi. Для спілкування з сервером було створено та використано відповідний SSL-сертифікат.
+GPS-трекер встановлює зв’язок із супутником та повертає поточні координати (широту та довготу) місцезнаходження домашнього улюбленця. Отримані дані передаються у сервіс для роботи з Google Map API, який на основі отриманих даних повертає розширену інформацію про розташування тварини.
+Щодо інженерних рішень, можна виділити спілкування пристроїв з сервером, яке відбувається за участю ряду команд (спеціального протоколу), що створюються на сервері та оброблюються IoT-пристроєм у залежності від їх типу (див. Додаток Б «Код для взаємодії з IoT-пристроями»). У якості протоколу було створено базовий клас «CommandBase», що складається з властивості типу команди та обраної локалі. Для роботи з IoT-пристроями можна виділити наступний ряд типів команд: «ConfigurePetDevice», «GetCurrentTemperature», «GetAverageTemperature», «GetCurrentLocation», «ConfigureRFIDReader».
+Крім цього, наявний ряд відповідей розумного пристрою, базовим класом для яких є «ArduinoResponseBase», що має властивість «IsSuccess», що приймає значення «true» у разі успішного виконання операції, та «ErrorCode», у який записується код помилки у разі неуспішної операції.
+Щодо ефективних математичних обчислень та акумуляції даних, можна виділити обрахунок середнього показника температури, який відбувається на стороні розумного пристрою. Дані, отримані пристроєм протягом дня з інтервалом у годину, зберігаються у спеціальному масиві, який оновлюється автоматично при зміні поточної дати.
+Система підтримує дві локалізації: англійську та українську. Реалізація локалізації полягає у використанні відповідних кодових таблиць символів та відповідних до кожної з доступних локалізації одиниць виміру: для англійської локалізації для виміру температури тіла використано Фаренгейт, для української – Цельсій.
+Адмініструванням та конфігурацією IoT-пристроїв займається системний адміністратор та власник установи. Системний адміністратор відповідає за налаштування розумного пристрою для виміру температури та визначення поточного місцезнаходження тварини. Власник установи має можливість конфігурувати RFID-зчитувач. Адміністрування відбуватиметься з відповідної панелі адміністратора.
+Відповідний код для роботи пристроями IoT наведено у Додатку Б.
+
+2 ПОБУДОВА ДІАГРАМИ ПРЕЦЕДЕНТІВ
+
+На діаграмі прецедентів наведено опис функціонального призначення IoT-частини застосунку (див. Додаток А рис А.1).
+Серед акторів можна виділити системного адміністратора, власника домашнього улюбленця, власника установи пет-френдлі, RFID-зчитувач, датчик температури та модуль GPS.
+Системний адміністратор має можливість конфігурувати IoT-пристрій для отримання температури тіла та поточного місцезнаходження тварини.
+Власник установи пет-френдлі має можливість налаштовувати RFID-зчитувач, що прив’язується до обраної установи пет-френдлі. При вході у відповідну установу мітка на ошийнику сканується RFID-зчитувачем, створюється повідомлення з інформацією про тварину-відвідувача, що надсилається адміністратору установи.
+Користувач має можливість отримувати дані щодо поточної температури тіла тварини, середньої температури тіла тварини протягом доби, поточного місцерозташування тварини.
+RFID-зчитувач зчитує мітку на ошийнику тварини, оброблює отримані дані та надсилає на відповідну кінцеву точку на сервері.
+Пристрій для відстеження поточного місцезнаходження та температури тіла тварини отримує актуальні дані, оброблює їх (або виконує ефективні математичні перетворення) та надсилає у відповідь на сервер.
+
+3 ПОБУДОВА ДІАГРАМИ ВЗАЄМОДІЇ
+
+На діаграмах взаємодії наведено детальний опис процесу обміну даними в межах системи (див. Додаток А рис. А.2, рис. А.3 та рис. А.4).
+На рисунку А.2 зображено процес обміну повідомленнями серверу з RFID-зчитувачем.
+Під час конфігурації зчитувача з сервера відправляється відповідна команда з даними для підключення до мережі Wi-Fi та посиланням для подальшої відправки відповіді на сервер, натомість на сервер повертається IP-адреса RFID-зчитувача. Під час активації зчитувача відбувається прив’язка до обраної установи, для власника якої буде автоматично створено повідомлення під час сканування мітки на ошийнику тварини-відвідувача.
+На рисунку А.3 зображено процес обміну повідомленнями серверу з датчиком температури.
+Під час конфігурації датчика з сервера відправляється відповідна команда з даними для підключення до мережі Wi-Fi, натомість на сервер повертається IP-адреса датчика температури. У залежності від надісланої на пристрій команди відбувається або зчитування температури, або розрахунок середнього показника темпераутри за день, що надсилається у якості відповіді на сервер.
+На рисунку А.4 зображено процес обміну повідомленнями серверу з GPS-трекером.
+Під час конфігурації модуля GPS з сервера відправляється відповідна команда з даними для підключення до мережі Wi-Fi, натомість на сервер повертається IP-адреса GPS-трекеру. Для отримання актуальних координат пристрій зв’язується з супутником та отримує від нього дані у вигляді широти та довготи, які потім надсилаються на сервер у якості відповіді.
+
+4 ПОБУДОВА ДІАГРАМИ ДІЯЛЬНОСТІ
+
+На діаграмах діяльності можна побачити усі можливі дії, що виконує кожен з пристроїв в межах системи (див. Додаток А рис. А.5, рис. А.6 та рис. А.7).
+На рисунку А.5 зображено основний процес виконання роботи RFID-зчитувача: ініціалізація пристрою, конфігурація та підключення до мережі Wi-Fi. Після успішного підключення до мережі та активації зчитувача дані зчитуються з мітки та передаються на сервер для подальшого створення повідомлення з інформацією про тварину-відвідувача.
+На рисунку А.6 зображено основний процес виконання роботи за допомогою датчика температури: ініціалізація пристрою, конфігурація та підключення до мережі Wi-Fi. Після успішного підключення до мережі та активації датчика температури відбувається зчитування актуальних даних температури або обрахунок середнього показника температури протягом доби, що надсилаються у якості відповіді на сервер.
+На рисунку А.7 зображено основний процес виконання роботи за допомогою трекеру GPS: ініціалізація пристрою, конфігурація та підключення до мережі Wi-Fi. Після успішного підключення до мережі та активації трекеру GPS відбувається отримання поточних координат широти та довготи місцерозташування домашнього улюбленця.
+
+5 ПОБУДОВА ДІАГРАМИ СТАНІВ
+
+На діаграмах станів можна побачити життєвий цикл RFID-зчитувача, датчика температури та GPS-трекеру (див. Додаток А рис. А.8, рис. А.9 та рис. А.10).
+На рисунку А.8 детально проілюстровано переходи між різними станами під час зчитування відповідної RFID-мітки.
+Після активації зчитувача та зчитування мітки відбувається зчитування даних. Після успішної перевірки на наявність необхідних для відправки на сервер даних формується запит на сервер. Після відправки цього запиту зчитувач може перейти у стан деактивації або повернутися до стану очікування на зчитування мітки.
+На рисунку А.9 зображено переходи між різними станами датчика температури.
+Після активації датчика відбувається отримання поточного показника температури або розрахунок середнього показника температури за поточну добу. Після успішної перевірки на наявність необхідних для відправки на сервер даних формується відповідь з необхідними даними. Після відправки цього запиту датчик переходить у стан очікування на отримання нових даних температури.
+На рисунку А.10 зображено переходи між різними станами GPS-трекеру.
+Після активації GPS-трекеру відбувається отримання поточного місцезнаходження. Після успішної перевірки на наявність необхідних для відправки на сервер даних формується відповідь.
+
+ВИСНОВКИ
+
+У результаті виконання лабораторної роботи було створено програмне забезпечення для роботи з IoT-пристроями для програмної системи «PawPoint». Крім цього, у ході роботи було створено діаграму прецедентів, діаграму діяльності, діаграму станів та діаграму взаємодії.
+Посилання на репозиторій github: https://github.com/NureVyshniakViktoriia/apz-pzpi-21-5-vyshniak-viktoriia/tree/main/Task3.
+Посилання на відео з захистом в YouTube: https://youtu.be/cRfu3t9bHxM.
+
+ДОДАТОК Б
+Код для взаємодії з IoT-пристроями
+
+Код класу CommandBase.cs:
+1  using Common.Enums;
+2  
+3  namespace BLL.Infrastructure.Commands;
+4  public class CommandBase
+5  {
+6      public CommandType CommandType { get; set; }
+7  
+8      public string Locale { get; set; } = "uk-UA";
+9  }
+Код класу ArduinoResponseBase.cs:
+1  public class ArduinoResponseBase
+2  {
+3      public bool IsSuccess { get; set; }
+4  
+5      public string ErrorCode { get; set; }
+6  }
+Код класу ArduinoSettingsService.cs:
+1  using BLL.Contracts;
+2  using BLL.Infrastructure.Commands;
+3  using BLL.Infrastructure.Models.Arduino;
+4  using Common.Enums;
+5  using Common.Resources;
+6  using Newtonsoft.Json;
+7  using System.Net;
+8  using System.Text;
+9  using System.IO.Ports;
+10  using DAL.UnitOfWork;
+11  using System.Globalization;
+12  
+13  namespace BLL.Services;
+14  public class ArduinoSettingsService : IArduinoSettingsService
+15  {
+16      private readonly IInstitutionService _institutionService;
+17      private readonly IUnitOfWork _unitOfWork;
+18      private readonly IGoogleMapsLocationService _googleMapsLocationService;
+19  
+20      public ArduinoSettingsService(
+21          IInstitutionService institutionService,
+22          IUnitOfWork unitOfWork,
+23          IGoogleMapsLocationService googleMapsLocationService)
+24      {
+25          _institutionService = institutionService;
+26          _unitOfWork = unitOfWork;
+27          _googleMapsLocationService = googleMapsLocationService;
+28      }
+29  
+30      public ConfigureResponse ConfigurePetDevice(WifiSettingsModel wifiSettings, Guid arduinoSettingsId)
+31      {
+32          var command = new ConfigureCommand
+33          {
+34              CommandType = CommandType.ConfigurePetDevice,
+35              WifiSettings = wifiSettings,
+36          };
+37  
+38          var arduinoResponse = SendRequestBySerialPort<ConfigureResponse>(command);
+39          if (!arduinoResponse.IsSuccess)
+40              throw new ArgumentException(Resources.Get(arduinoResponse.ErrorCode));
+41  
+42          _unitOfWork.ArduinoSettings.Value.SetPetDeviceIp(arduinoResponse.IpAddress, arduinoSettingsId);
+43  
+44          return arduinoResponse;
+45      }
+46  
+47      public ConfigureResponse ConfigureRFIDReader(WifiSettingsModel wifiSettings, int rfidSettingsId)
+48      {
+49          var institution = _unitOfWork.Institutions.Value.GetById(rfidSettingsId);
+50          var command = new ConfigureRFIDReaderCommand
+51          {
+52              CommandType = CommandType.ConfigureRFIDReader,
+53              WifiSettings = wifiSettings,
+54              UserId = institution.OwnerId
+55          };
+56  
+57          var arduinoResponse = SendRequestBySerialPort<ConfigureResponse>(command);
+58          if (!arduinoResponse.IsSuccess)
+59              throw new ArgumentException(Resources.Get(arduinoResponse.ErrorCode));
+60  
+61          _unitOfWork.Institutions.Value.SetRFIDReaderIp(rfidSettingsId, arduinoResponse.IpAddress);
+62  
+63          return arduinoResponse;
+64      }
+65  
+66      public async Task<TemperatureMonitorResponse> GetPetCurrentTemperature(Guid petId)
+67      {
+68          var apiUrl = GetPetDeviceApiUrl(petId);
+69          var command = new CommandBase
+70          { 
+71              CommandType = CommandType.GetCurrentTemperature,
+72              Locale = CultureInfo.CurrentCulture.Name
+73          };
+74  
+75          var response = await ProcessCommand<TemperatureMonitorResponse>(command, apiUrl);
+76          return response;
+77      }
+78  
+79      public async Task<TemperatureMonitorResponse> GetPetAverageTemperature(Guid petId)
+80      {
+81          var apiUrl = GetPetDeviceApiUrl(petId);
+82          var command = new CommandBase
+83          { 
+84              CommandType = CommandType.GetAverageTemperature,
+85              Locale = CultureInfo.CurrentCulture.Name
+86          };
+87  
+88          var response = await ProcessCommand<TemperatureMonitorResponse>(command, apiUrl);
+89          return response;
+90      }
+91  
+92      public async Task<GPSTrackerResponse> GetPetCurrentLocation(Guid petId)
+93      {
+94          var command = new CommandBase { CommandType = CommandType.GetCurrentLocation };
+95          var apiUrl = GetPetDeviceApiUrl(petId);
+96  
+97          var response = await ProcessCommand<GPSTrackerResponse>(command, apiUrl);
+98          if (response.IsSuccess)
+99              response.AddressData = _googleMapsLocationService.GetLocation(response.Longtitude, response.Latitutde);
+100  
+101          return response;
+102      }
+103  
+104      #region Helpers
+105  
+106      private async Task<T> ProcessCommand<T>(
+107          CommandBase command,
+108          string apiUrl) where T : ArduinoResponseBase
+109      {
+110          try
+111          {
+112              var jsonCommand = JsonConvert.SerializeObject(command);
+113              var responseMessage = await SendHttpsRequest(jsonCommand, apiUrl);
+114              var arduinoResponse = await ProcessResponse<T>(responseMessage);
+115  
+116              return arduinoResponse;
+117          }
+118          catch (Exception ex)
+119          {
+120              return (T)new ArduinoResponseBase
+121              {
+122                  IsSuccess = false
+123              };
+124          }
+125      }
+126  
+127      private async Task<HttpResponseMessage> SendHttpsRequest(string jsonData, string apiUrl)
+128      {
+129          ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+130          using var httpClientHandler = new HttpClientHandler();
+131          httpClientHandler.ServerCertificateCustomValidationCallback
+132              = (sender, cert, chain, sslPolicyErrors) => true;
+133  
+134          using var client = new HttpClient(httpClientHandler);
+135          var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+136          var response = await client.PostAsync(apiUrl, content);
+137  
+138          return response;
+139      }
+140  
+141      private async Task<T> ProcessResponse<T>(HttpResponseMessage responseMessage)
+142          where T : ArduinoResponseBase
+143      {
+144          var byteArray = await responseMessage.Content.ReadAsByteArrayAsync();
+145          var jsonString = Encoding.UTF8.GetString(byteArray, 0, byteArray.Length);
+146          var arduinoResponse = JsonConvert.DeserializeObject<T>(jsonString);
+147  
+148          return arduinoResponse;
+149      }
+150  
+151      private T SendRequestBySerialPort<T>(CommandBase command)
+152          where T : ArduinoResponseBase
+153      {
+154          var jsonCommand = JsonConvert.SerializeObject(command);
+155          var port = GetAvailablePort();
+156          try
+157          {
+158              port.Open();
+159              port.Write($"{jsonCommand}\n");
+160  
+161              return GetSerialPortResponse<T>(port);
+162          }
+163          catch (Exception ex)
+164          {
+165              throw;
+166          }
+167          finally
+168          {
+169              port.Close();
+170          }
+171      }
+172  
+173      private T GetSerialPortResponse<T>(SerialPort port)
+174          where T : ArduinoResponseBase
+175      {
+176          var response = string.Empty;
+177          T arduinoResponse;
+178  
+179          while (!TryDeserializeResponse<T>(response, out arduinoResponse))
+180              response = port.ReadLine();
+181  
+182          return arduinoResponse;
+183      }
+184  
+185      private bool TryDeserializeResponse<T>(string response, out T result)
+186          where T : ArduinoResponseBase
+187      {
+188          try
+189          {
+190              result = JsonConvert.DeserializeObject<T>(response);
+191          }
+192          catch
+193          {
+194              result = null;
+195              return false;
+196          }
+197  
+198          return result != null && result.ErrorCode != null;
+199      }
+200  
+201      private SerialPort GetAvailablePort()
+202      {
+203          var serialPorts = SerialPort.GetPortNames();
+204          var port = new SerialPort(
+205              serialPorts[0],
+206              9600,
+207              Parity.None,
+208              8,
+209              StopBits.One);
+210  
+211          return port;
+212      }
+213  
+214      private string GetRFIDApiUrl(int institutionId)
+215      {
+216          var settings = _institutionService.GetRFIDSettingsByInstitutionId(institutionId);
+217          var ipAddress = settings.RFIDReaderIpAddress;
+218          if (string.IsNullOrEmpty(ipAddress))
+219              throw new ArgumentException();
+220  
+221          var apiUrl = string.Format("https://{0}:443/data", ipAddress);
+222          return apiUrl;
+223      }
+224  
+225      private string GetPetDeviceApiUrl(Guid petId)
+226      {
+227          var settings = _unitOfWork.ArduinoSettings.Value.GetByPetId(petId);
+228          var ipAddress = settings.PetDeviceIpAddress;
+229          if (string.IsNullOrWhiteSpace(ipAddress))
+230              throw new ArgumentException();
+231  
+232          var apiUrl = string.Format("https://{0}:443/data", ipAddress);
+233          return apiUrl;
+234      }
+235  
+236      #endregion
+237  }
+Код файлу RFIDReader.ino:
+1  #include <MFRC522.h>
+2  #include <ESP8266HTTPClient.h>
+3  #include <WiFiClientSecureBearSSL.h>
+4  #include <ESP8266WebServerSecure.h>
+5  #include <ArduinoJson.h>
+6  #include <ArduinoJson.hpp>
+7  #include <Wire.h>
+8  #include <ESP8266WiFi.h>
+9  #include <ESP8266mDNS.h>
+10  #include <ESP8266WebServer.h>
+11  #include <ESP_EEPROM.h>
+12  #include <SPI.h>
+13  
+14  #define RST_PIN D3
+15  #define SS_PIN D4
+16  
+17  MFRC522 rfid(SS_PIN, RST_PIN);
+18  
+19  String ssid = "";
+20  String password = "";
+21  String callbackUrl = "";
+22  int userId = 1;
+23  
+24  const int eepromSize = 512;
+25  const int ATTEMPT_COUNT = 20;
+26  
+27  #pragma region Types
+28  
+29  enum CommandType {
+30    ConfigureRFIDReader = 4
+31  };
+32  
+33  class Notification {
+34  public:
+35    Notification(
+36      int userId = 0,
+37      String petRfid = ""
+38    ) {
+39      this->userId = userId;
+40      this->petRfid = petRfid;
+41    }
+42  
+43    String toJson() {
+44      StaticJsonDocument<256> doc;
+45      doc["UserId"] = this->userId;
+46      doc["PetRFID"] = this->petRfid;
+47  
+48      String jsonString;
+49      serializeJson(doc, jsonString);
+50  
+51      return jsonString;
+52    }
+53  
+54  private:
+55    int userId;
+56    String petRfid;
+57  };
+58  
+59  class ArduinoResponse {
+60  public:
+61    ArduinoResponse(
+62      bool isSuccess = false, 
+63      String errorCode = "", 
+64      String payload = "") {
+65        this->isSuccess = isSuccess;
+66        this->errorCode = errorCode;
+67        this->payload = payload;
+68    }
+69  
+70    String toJson() {
+71        StaticJsonDocument<256> doc;
+72        doc["IsSuccess"] = this->isSuccess;
+73        doc["ErrorCode"] = this->errorCode;
+74        doc["Payload"] = this->payload;
+75  
+76        String jsonString;
+77        serializeJson(doc, jsonString);
+78  
+79        return jsonString;
+80    }
+81  
+82  private:
+83      bool isSuccess;
+84      String errorCode;
+85      String payload;
+86  };
+87  
+88  #pragma endregion
+89  
+90  #pragma region Helpers
+91  
+92  void parseJsonData(ArduinoJson::JsonDocument & doc, String & jsonString) {
+93    DeserializationError error = deserializeJson(doc, jsonString);
+94  
+95    if (error) {
+96      Serial.print("JSON parsing failed: ");
+97      Serial.println(error.c_str());
+98      return;
+99    }
+100  }
+101  
+102  String readFromMemory(int start, int end) {
+103    String data = "";
+104    for (int i = start; i < end; ++i) {
+105      char readChar = char(EEPROM.read(i));
+106      if (readChar == 0) {
+107        break;
+108      }
+109  
+110      data += readChar;
+111    }
+112  
+113    return data;
+114  }
+115  
+116  void writeInMemory(int start, String data) {
+117    Serial.println("writing eeprom:");
+118    for (int i = 0; i < data.length(); i++)
+119    {
+120      EEPROM.write(start + i, data[i]);
+121      Serial.print("Wrote: ");
+122      Serial.println(data[i]);
+123    }
+124  }
+125  
+126  void loadSavedConfig() {
+127    EEPROM.begin(eepromSize);
+128  
+129    String esid = readFromMemory(0, 32);
+130    Serial.println("Stored SSID: " + esid);
+131  
+132    String epass = readFromMemory(32, 64);
+133    Serial.println("Stored password: " + epass);
+134  
+135    String eCallbackURL = readFromMemory(64, 128);
+136    Serial.println("Stored callback url: " + eCallbackURL);
+137  
+138    String eUserId = readFromMemory(128, 160);
+139    Serial.println("Stored user id: " + eUserId);
+140  
+141    ssid = esid;
+142    password = epass;
+143    callbackUrl = eCallbackURL;
+144    userId = eUserId.toInt();
+145  
+146    EEPROM.end();
+147  }
+148  
+149  void connectToWiFi() {
+150    Serial.println("Connecting to WiFi");
+151  
+152    const char* wifi = ssid.c_str();
+153    const char* pass = password.c_str();
+154    
+155    WiFi.begin(wifi, pass);
+156  
+157    int attemptCount = 0;
+158    while (WiFi.status() != WL_CONNECTED 
+159      && attemptCount < ATTEMPT_COUNT) 
+160    {
+161      delay(1000);
+162      attemptCount++;
+163    }
+164  
+165    String jsonResponse;
+166    if (WiFi.status() != WL_CONNECTED) {
+167      ArduinoResponse response(false, "INVALID_WIFI_CREDS", "");
+168      jsonResponse = response.toJson();
+169    } else {
+170      ArduinoResponse response(true, "", WiFi.localIP().toString());
+171      jsonResponse = response.toJson();
+172    }
+173  
+174    Serial.println(jsonResponse);
+175  }
+176  
+177  String getDomainFromCallbackUrl() {
+178    String ipAddress = "";
+179    int colonIndex = callbackUrl.indexOf(':');
+180    
+181    if (colonIndex != -1) {
+182      ipAddress = callbackUrl.substring(colonIndex + 3, callbackUrl.indexOf(':', colonIndex + 3));
+183      Serial.print("IP address: ");
+184      Serial.println(ipAddress);
+185    } else {
+186      Serial.println("Invalid URL format");
+187    }
+188  
+189    return ipAddress;
+190  }
+191  
+192  String readRFID() {
+193    if (!rfid.PICC_IsNewCardPresent()) {
+194      return "";
+195    }
+196  
+197    if (!rfid.PICC_ReadCardSerial()) {
+198      return "";
+199    }
+200  
+201    String tag = "";
+202    for (int i = 0; i < rfid.uid.size; i++) {
+203      tag += rfid.uid.uidByte[i];
+204    }
+205  
+206    rfid.PICC_HaltA();
+207    rfid.PCD_StopCrypto1();
+208  
+209    return tag;
+210  }
+211  
+212  void processTag() {
+213    String tag = readRFID();
+214    if (tag == "") {
+215      return;
+216    }
+217  
+218    WiFiClientSecure client;
+219    String serverDomain = getDomainFromCallbackUrl();
+220    client.setInsecure();
+221    
+222    if (client.connect(serverDomain, 7114)){
+223      Serial.println("Connected to server");
+224    } else {
+225      Serial.println("ERROR connection to server");
+226    }
+227  
+228    HTTPClient https;
+229      
+230    https.begin(client, callbackUrl);
+231    https.addHeader("Content-Type", "application/json");
+232  
+233    Notification notification(userId, tag);
+234    String data = notification.toJson();
+235  
+236    int httpsResponseCode = https.POST(data);
+237    Serial.print("HTTP status code = ");
+238    Serial.println(httpsResponseCode);   
+239      
+240    https.end();
+241  }
+242  
+243  #pragma endregion
+244  
+245  #pragma region Commands
+246  
+247  void configureRFIDReader(ArduinoJson::JsonDocument & doc) {
+248    String newSsid = doc["WifiSettings"]["Ssid"];
+249    String newPassword = doc["WifiSettings"]["Password"];
+250    String newCallbackUrl = doc["WifiSettings"]["CallbackUrl"];
+251    String newUserId = doc["UserId"];
+252  
+253    EEPROM.begin(eepromSize);
+254    for (int i = 0; i < 160; i++) {
+255      EEPROM.write(i, 0);
+256    }
+257  
+258    Serial.println("writing eeprom ssid:");
+259    writeInMemory(0, newSsid);
+260  
+261    Serial.println("writing eeprom pass:");
+262    writeInMemory(32, newPassword);
+263  
+264    Serial.println("writing eeprom callback url:");
+265    writeInMemory(64, newCallbackUrl);
+266  
+267    Serial.println("writing eeprom user id:");
+268    writeInMemory(128, newUserId);
+269  
+270    EEPROM.commit();
+271    EEPROM.end();
+272  
+273    ESP.restart();
+274  }
+275  
+276  #pragma endregion
+277  
+278  void setup() {
+279    Serial.begin(9600);
+280    Serial.println("Setup started.");
+281    loadSavedConfig();
+282    connectToWiFi();
+283    SPI.begin();
+284    rfid.PCD_Init();
+285    Serial.println("Setup finished.");
+286  }
+287  
+288  void loop() {
+289    if (Serial.available()) {
+290        String jsonString = Serial.readStringUntil('\n');
+291        StaticJsonDocument<256> doc;
+292        parseJsonData(doc, jsonString);
+293  
+294        CommandType command = (CommandType)doc["CommandType"];
+295        switch(command) {
+296          case ConfigureRFIDReader:
+297            configureRFIDReader(doc);
+298            break;
+299          default:
+300            break;
+301        }
+302    }
+303    
+304    if (WiFi.status() == WL_CONNECTED) {
+305        MDNS.update();
+306        processTag();
+307    }
+308  }
