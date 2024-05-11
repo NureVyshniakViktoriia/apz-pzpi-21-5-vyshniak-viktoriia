@@ -1,0 +1,76 @@
+<div class="modal-content">
+	<div class="modal-header">
+		<h5 class="modal-title">{{ 'diaryNote' | translateAsync }}</h5>
+		<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close(false)"></button>
+	</div>
+	<div class="modal-body">
+		<form *ngIf="diaryNoteForm" [formGroup]="diaryNoteForm">
+			<input name="diaryNoteId" hidden value="{{ this.diaryNoteId }}"/>
+
+			<div class="mb-3">
+				<label for="title" class="form-label">{{ 'title' | translateAsync }}</label>
+				<input type="text" class="form-control" id="title" formControlName="title" />
+				<div 
+					*ngIf="diaryNoteForm.get('title')?.invalid && diaryNoteForm.get('title')?.touched" 
+					class="text-danger"
+				>
+					<small>{{'title' | translateAsync}} {{'required' | translateAsync}}</small>
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<label for="comment" class="form-label">{{ 'comment' | translateAsync }}</label>
+				<textarea class="form-control" id="comment" formControlName="comment"></textarea>
+				<div 
+					*ngIf="diaryNoteForm.get('comment')?.invalid && diaryNoteForm.get('comment')?.touched"
+					class="text-danger"
+				>
+					<small>{{'comment' | translateAsync}} {{'required' | translateAsync}}</small>
+				</div>
+			</div>
+		</form>
+
+		<ng-container *ngIf="this.diaryNoteId.toString() != emptyGuid">
+			<div class="col-md">
+				<div class="row">
+					<form *ngIf="documentForm" [formGroup]="documentForm" (ngSubmit)="uploadDocument()">
+						<input name="diaryNoteId" hidden value="{{ this.diaryNoteId }}"/>
+						<div class="mb-3">
+							<label for="document" class="form-label">{{'document' | translateAsync}}</label>
+							<input 
+								#documentFileInput 
+								type="file" 
+								name="document" 
+								class="form-control" 
+								id="document" 
+								(change)="onDocumentFileChange($event)"
+							/>
+						</div>
+	
+						<div class="mb-3 row">
+							<div class="col-md-4 mr-3">
+								<button type="submit" class="btn btn-primary btn-block">
+									{{'uploadDocument' | translateAsync}}
+								</button>
+							</div>
+							<div class="col-md-4">
+								<button type="button" class="btn btn-secondary btn-block" (click)="downloadDocument()">
+									{{'downloadDocument' | translateAsync}}
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</ng-container>	
+	</div>
+
+	<div class="modal-footer">
+		<button type="button" class="btn px-5 mx-2 btn-danger" (click)="activeModal.close(false)">
+			{{ 'close' | translateAsync }}
+		</button>
+		<button type="button" class="btn btn-success" (click)="applyDiaryNote()">
+			{{ 'save' | translateAsync }}
+		</button>
+	</div>
+</div>

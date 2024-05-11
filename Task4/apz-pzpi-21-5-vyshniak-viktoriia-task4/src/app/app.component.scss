@@ -1,0 +1,71 @@
+.gradient-custom {
+	background: #6a11cb;
+	background: -webkit-linear-gradient(
+		to right,
+		rgba(106, 17, 203, 1),
+		rgba(37, 117, 252, 1)
+	);
+	background: linear-gradient(
+		to right,
+		rgba(106, 17, 203, 1),
+		rgba(37, 117, 252, 1)
+	);
+	min-height: calc(100% - 5vmin);
+	display: flex;
+	flex-direction: column;
+
+	.active {
+		background: rgba(99, 103, 129, 0.35);
+	}
+}
+
+.page-container {
+	flex: 1 1 0; 
+	padding-top: 20px;
+}
+
+.btn-gradient {
+	margin-top: 10px;
+	margin-bottom: 5px;
+	background: linear-gradient(to right, #315ff7 0%, #3155f7 30%, #8731f7 50%, #3134f7 70%, #3134f7 100%);
+	background-size: 200% auto;
+	color: #fff;
+	transition: all 0.5s ease-out;
+
+	&:hover {
+		background-position: right center;
+	}
+}
+
+.label-padding {
+	padding-left: 10px;
+}
+
+.parent-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.bars {
+	margin: 0 auto;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	width: 48px;
+	aspect-ratio: 1;
+	--c: no-repeat linear-gradient(to bottom right, rgb(255, 0, 255), rgb(98, 0, 255));
+	background:
+		var(--c) 0%   50%,
+		var(--c) 50%  50%,
+		var(--c) 100% 50%;
+	background-size: 20% 100%;
+	animation: b1 1s infinite linear;
+}
+
+@keyframes b1 {
+	0%  {background-size: 20% 100%, 20% 100%, 20% 100%}
+	33% {background-size: 20% 10%, 20% 100%, 20% 100%}
+	50% {background-size: 20% 100%, 20% 10%, 20% 100%}
+	66% {background-size: 20% 100%, 20% 100%, 20% 10%}
+	100% {background-size: 20% 100%, 20% 100%, 20% 100%}
+}

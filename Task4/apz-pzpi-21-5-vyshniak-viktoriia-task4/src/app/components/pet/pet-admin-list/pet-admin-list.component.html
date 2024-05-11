@@ -1,0 +1,32 @@
+<div class="main-container">
+	
+	<table class="table table-bordered" *ngIf="!this.isLoading">
+		<thead>
+			<tr>
+				<th>{{ 'ID' | translateAsync }}</th>
+				<th>{{ 'nickname' | translateAsync }}</th>
+				<th>{{ 'petDeviceIpAddress' | translateAsync }}</th>
+				<th>{{ 'ownerLogin' | translateAsync }}</th>
+				<th>{{ 'action' | translateAsync }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let pet of pets$ | async">
+				<td>{{ pet.petId }}</td>
+				<td>{{ pet.nickName }}</td>
+				<td>{{ pet.arduinoSettings.petDeviceIpAddress }}</td>
+				<td>{{ pet.ownerLogin }}</td>
+				<td class="actions">
+					<button class="btn btn-info" (click)="openConfigurePetModal(pet.petId)">
+						{{ 'configurePet' | translateAsync }}
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="text-center parent-container">
+		<div *ngIf="this.isLoading" class="bars"></div>
+	</div>
+
+</div>

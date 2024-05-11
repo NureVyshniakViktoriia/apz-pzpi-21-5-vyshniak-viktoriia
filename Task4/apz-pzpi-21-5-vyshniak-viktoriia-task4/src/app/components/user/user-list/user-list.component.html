@@ -1,0 +1,38 @@
+<div class="main-container">
+	<div class="btn-container mb-3">
+		<button class="btn btn-primary" (click)="doDatabaseBackup()">
+			{{ 'doBackup' | translateAsync }}
+		</button>
+	</div>
+
+	<table class="table table-bordered" *ngIf="!this.isLoading">
+		<thead>
+			<tr>
+				<th>{{ 'ID' | translateAsync }}</th>
+				<th>{{ 'email' | translateAsync }}</th>
+				<th>{{ 'login' | translateAsync }}</th>
+				<th>{{ 'role' | translateAsync }}</th>
+				<th>{{ 'registeredOn' | translateAsync }}</th>
+				<th>{{ 'action' | translateAsync }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let userProfile of users$ | async">
+				<td>{{ userProfile.userId }}</td>
+				<td>{{ userProfile.email }}</td>
+				<td>{{ userProfile.login }}</td>
+				<td>{{ getUserRoleName(userProfile.role) }}</td>
+				<td>{{ userProfile.registeredOnUtc | l10nDateAsync }}</td>
+				<td class="actions">
+					<button class="btn btn-info" (click)="openSetUserRoleModal(userProfile.userId, userProfile.login)">
+						{{ 'editRole' | translateAsync }}
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="text-center parent-container">
+		<div *ngIf="this.isLoading" class="bars"></div>
+	</div>
+</div>

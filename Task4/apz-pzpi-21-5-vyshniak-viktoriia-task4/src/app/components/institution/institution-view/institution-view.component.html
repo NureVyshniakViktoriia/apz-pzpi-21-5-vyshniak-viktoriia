@@ -1,0 +1,84 @@
+<div class="main-container">
+	<div class="row">
+		<div class="md-9">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link" (click)="onTabClick('institution')" [class.active]="activeTab === 'institution'">
+						{{ 'institution' | translateAsync }}
+					</a>
+				</li>
+		
+				<li class="nav-item">
+					<a class="nav-link" (click)="onTabClick('facilities')" [class.active]="activeTab === 'facilities'">
+						{{ 'facilities' | translateAsync }}
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div class="my-3" *ngIf="institution$ | async as institution">
+            <button class="btn btn-success" [disabled]="institution.rating.isSetByCurrentUser" (click)="openSetRatingModal(institution.institutionId)">
+                {{ 'rating' | translateAsync }} - {{ institution.rating.mark }}
+            </button>         
+        </div>
+	</div>
+
+	<div *ngIf="activeTab === 'institution'" class="tab-content">
+		<div class="row" *ngIf="(institution$ | async) as institution">
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">{{ 'institutionDetails' | translateAsync }}</h5>
+						<p class="card-text"><strong>{{ 'name' | translateAsync }}:</strong> {{ institution.name }}</p>
+						<p class="card-text"><strong>{{ 'description' | translateAsync }}:</strong> {{ institution.description }}</p>
+						<p class="card-text"><strong>{{ 'phoneNumber' | translateAsync }}:</strong> {{ institution.phoneNumber }}</p>
+						<p class="card-text"><strong>{{ 'address' | translateAsync }}:</strong> {{ institution.address }}</p>
+						<p class="card-text">
+							<strong>{{ 'institutionType' | translateAsync }}:</strong> {{ getInstitutionTypeName(institution.institutionType) }}
+						</p>
+						<p class="card-text">
+							<strong>{{ 'region' | translateAsync }}:</strong> {{ getRegionName(institution.region) }}
+						</p>
+						<p class="card-text">
+							<strong>{{ 'websiteURL' | translateAsync }}:</strong> 
+							<a [href]="institution.websiteUrl" target="_blank">{{ institution.websiteUrl }}</a>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">{{ 'logo' | translateAsync }}</h5>
+						<div class="logo-container">
+							<img 
+								*ngIf="uploadedImageUrl" 
+								[src]="uploadedImageUrl" 
+								width="300" 
+								height="500" 
+								class="card-img-top" 
+								alt="Uploaded Logo"
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div *ngIf="activeTab === 'facilities'" class="tab-content">
+		<div class="row" *ngIf="!this.isLoading">
+			<div class="col-md-12">
+				<app-facility-list
+					[facilities$]="facilities$"
+					[isAdmin]="false"
+				>
+				</app-facility-list>
+			</div>
+		</div>
+	</div>
+
+	<div class="text-center parent-container">
+		<div *ngIf="this.isLoading" class="bars"></div>
+	</div>
+	
+</div>

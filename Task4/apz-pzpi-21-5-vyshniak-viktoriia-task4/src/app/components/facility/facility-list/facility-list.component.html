@@ -1,0 +1,20 @@
+<div class="row">
+	<div class="col-md-12">
+		<div class="card">
+			<div class="card-body">
+				<h5 class="card-title">{{ 'facilities' | translateAsync }}</h5>
+				<div class="facility-list">
+					<div class="facility-item" *ngFor="let facility of facilities$ | async">
+						{{ facility.name }}
+						<input 
+							type="checkbox" 
+							*ngIf="isAdmin" 
+							[checked]="facility.isForInstitution" 
+							(change)="toggleFacilitySelection(facility)"
+						>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

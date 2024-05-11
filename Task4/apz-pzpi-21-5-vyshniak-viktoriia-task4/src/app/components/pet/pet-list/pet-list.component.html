@@ -1,0 +1,38 @@
+<div class="main-container">
+	<div class="row justify-content-end mb-3">
+		<div class="col-6 text-center">
+			<button class="btn btn-primary" (click)="addPet()">
+				{{ 'addPet' | translateAsync }}
+			</button>
+		</div>
+	</div>
+
+	<table class="table table-bordered" *ngIf="!this.isLoading">
+		<thead>
+			<tr>
+				<th>{{ 'ID' | translateAsync }}</th>
+				<th>{{ 'nickname' | translateAsync }}</th>
+				<th>{{ 'petType' | translateAsync }}</th>
+				<th>{{ 'action' | translateAsync }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let pet of pets$ | async">
+				<td>{{ pet.petId }}</td>
+				<td>{{ pet.nickName }}</td>
+				<td>{{ getPetTypeName(pet.petType) }}</td>
+				<td class="actions">
+					<ng-container>
+						<button class="btn btn-info" (click)="editPet(pet.petId)">{{ 'editButton' | translateAsync }}</button>
+						<button class="btn btn-danger" (click)="deletePet(pet.petId)">{{ 'deleteButton' | translateAsync }}</button>
+					</ng-container>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="text-center parent-container">
+		<div *ngIf="this.isLoading" class="bars"></div>
+	</div>
+
+</div>

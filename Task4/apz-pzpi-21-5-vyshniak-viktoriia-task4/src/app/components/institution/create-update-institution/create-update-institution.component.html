@@ -1,0 +1,202 @@
+ <div class="main-container">
+
+	<div class="row">
+		<div class="md-9">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link" (click)="onTabClick('institution')" [class.active]="activeTab === 'institution'">
+						{{ 'institution' | translateAsync }}
+					</a>
+				</li>
+		
+				<li class="nav-item" *ngIf="institutionId > 0">
+					<a class="nav-link" (click)="onTabClick('facilities')" [class.active]="activeTab === 'facilities'">
+						{{ 'facilities' | translateAsync }}
+					</a>
+				</li>
+
+				<li class="nav-item" *ngIf="institutionId > 0">
+					<a class="nav-link" (click)="onTabClick('configureRfidReader')" [class.active]="activeTab === 'configureRfidReader'">
+						{{ 'configureRfidReader' | translateAsync }}
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div *ngIf="activeTab === 'institution'" class="tab-content">
+		<div class="row">
+			<div class="col-md-6">
+				<form *ngIf="institutionForm" [formGroup]="institutionForm" (ngSubmit)="applyInstitution()">
+					<div class="mb-3">
+						<label for="name" class="form-label">{{'name' | translateAsync}}</label>
+						<input type="text" class="form-control" id="name" formControlName="name" />
+						<div 
+							*ngIf="institutionForm.get('name')?.hasError('required') && institutionForm.get('name')?.touched" 
+							class="text-danger"
+						>
+							<small>{{'name' | translateAsync}} {{'required' | translateAsync}}</small>
+						</div>
+					</div>
+	
+					<div class="row mb-3">
+						<div class="col-md-6 mb-3">
+							<label for="address" class="form-label">{{'address' | translateAsync}}</label>
+							<input type="text" class="form-control" id="address" formControlName="address" />
+							<div 
+								*ngIf="institutionForm.get('address')?.hasError('required') && institutionForm.get('address')?.touched" 
+								class="text-danger"
+							>
+								<small>{{'address' | translateAsync}} {{'required' | translateAsync}}</small>
+							</div>
+						</div>
+		
+						<div class="col-md-6">
+							<label for="phoneNumber" class="form-label">{{ 'phoneNumber' | translateAsync }}</label>
+							<input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber">
+							<div 
+								*ngIf="institutionForm.get('phoneNumber')?.hasError('required') && institutionForm.get('phoneNumber')?.touched" 
+								class="text-danger"
+							>
+								<small>{{ 'phoneNumber' | translateAsync }} {{ 'required' | translateAsync }}</small>
+							</div>
+						</div>
+					</div>
+	
+					<div class="mb-3">
+						<label for="websiteUrl" class="form-label">{{ 'websiteUrl' | translateAsync }}</label>
+						<input type="text" class="form-control" id="websiteUrl" formControlName="websiteUrl" />
+						<div 
+							*ngIf="institutionForm.get('websiteUrl')?.hasError('required') && institutionForm.get('websiteUrl')?.touched" 
+							class="text-danger"
+						>
+							<small>{{ 'websiteUrl' | translateAsync }} {{ 'required' | translateAsync }}</small>
+						</div>
+					</div>
+					
+					<div class="mb-3">
+						<label for="description" class="form-label">{{'description' | translateAsync}}</label>
+						<textarea class="form-control" id="description" formControlName="description"></textarea>
+						<div 
+							*ngIf="institutionForm.get('description')?.hasError('required') && institutionForm.get('description')?.touched" 
+							class="text-danger"
+						>
+							<small>{{'description' | translateAsync}} {{'required' | translateAsync}}</small>
+						</div>
+					</div>
+	
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label for="institutionType" class="form-label">{{ 'institutionType' | translateAsync }}</label>
+							<select class="form-select" id="institutionType" formControlName="institutionType">
+								<option *ngFor="let option of getInstitutionTypeOptions()" [ngValue]="option.value">
+									{{ option.label }}
+								</option>
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label for="region" class="form-label">{{ 'region' | translateAsync }}</label>
+							<select class="form-select" id="region" formControlName="region">
+								<option *ngFor="let option of getRegionOptions()" [ngValue]="option.value">
+									{{ option.label }}
+								</option>
+							</select>
+						</div>
+
+					</div>
+	
+					<div class="mb-3">
+						<button type="submit" class="btn btn-primary">{{'save' | translateAsync}}</button>
+					</div>
+				</form>
+	
+			</div>
+	
+			<div class="col-md-6" *ngIf="this.institutionId > 0">
+				<div class="row logo-container">
+					<form *ngIf="logoForm" [formGroup]="logoForm" (ngSubmit)="uploadLogo()">
+						<input name="institutionId" hidden value="{{ this.institutionId }}"/>
+						<div class="mb-3">
+							<label for="logo" class="form-label">{{'logo' | translateAsync}}</label>
+							<input 
+								#logoFileInput
+								type="file" 
+								name="file" 
+								class="form-control" 
+								id="logo" 
+								(change)="onLogoFileChange($event)"
+							/>
+						</div>
+
+						<div class="mb-3">
+							<button type="submit" class="btn btn-primary">{{'uploadLogo' | translateAsync}}</button>
+						</div>
+					</form>
+					<div *ngIf="uploadedImageUrl">
+						<img [src]="uploadedImageUrl" width="300" height="300">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div *ngIf="activeTab === 'facilities'" class="tab-content">
+		<div class="row">
+			<div class="col-md-12">
+				<app-facility-list
+					[facilities$]="facilities$"
+					[isAdmin]="true"
+					(removeFacility)="removeFacility($event)"
+					(addFacility)="addFacility($event)">
+				</app-facility-list>
+			</div>
+		</div>
+	</div>
+
+	<div *ngIf="activeTab === 'configureRfidReader'" class="tab-content">
+		<div class="row">
+			<div class="col-md-12">
+				<form *ngIf="configureRfidReaderForm" [formGroup]="configureRfidReaderForm">
+					<input name="rfidSettingsId" hidden value="{{ this.institutionId }}"/>
+		
+					<div class="mb-3">
+						<label for="rfidReaderIpAddress" class="form-label">
+							{{ 'rfidReaderIpAddress' | translateAsync }}
+						</label>
+						<input type="text" class="form-control" id="rfidReaderIpAddress" formControlName="rfidReaderIpAddress" />
+					</div>
+
+					<div formGroupName="wifiSettings">
+						<div class="mb-3">
+							<label for="ssid" class="form-label">
+								{{ 'ssid' | translateAsync }}
+							</label>
+							<input type="text" class="form-control" id="ssid" formControlName="ssid" />
+						</div>
+					
+						<div class="mb-3">
+							<label for="password" class="form-label">
+								{{ 'wifiPassword' | translateAsync }}
+							</label>
+							<input type="text" class="form-control" id="password" formControlName="password" />
+						</div>
+
+						<div class="mb-3">
+							<label for="callbackUrl" class="form-label">
+								{{ 'callbackUrl' | translateAsync }}
+							</label>
+							<input type="text" class="form-control" id="callbackUrl" formControlName="callbackUrl" />
+						</div>
+					</div>
+
+					<button type="button" class="btn btn-primary mt-2" (click)="configureRfidReader()">
+						{{ 'configure' | translateAsync }}
+					</button>
+		
+				</form>
+			</div>
+		</div>
+	</div>
+
+</div>

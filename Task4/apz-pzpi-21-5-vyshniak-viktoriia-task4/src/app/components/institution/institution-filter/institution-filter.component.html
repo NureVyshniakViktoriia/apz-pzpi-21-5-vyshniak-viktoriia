@@ -1,0 +1,38 @@
+<div class="row justify-content-center mb-3" [formGroup]="institutionFilterForm">
+    <div class="col-md-12">
+        <div class="row">
+            
+            <div class="col-md-4">
+                <label for="searchQuery" class="form-label">{{ 'searchQuery' | translateAsync }}</label>
+                <input type="text" class="form-control" id="searchQuery" formControlName="searchQuery" />
+            </div>
+
+            <div class="col-md-2">
+                <label for="type" class="form-label">{{ 'institutionType' | translateAsync }}</label>
+                <select class="form-select" id="type" formControlName="type">
+                    <option *ngFor="let option of getInstitutionTypeOptions()" [ngValue]="option.value">
+                        {{ option.label }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="sortByRatingAscending" class="form-label">{{ 'sort' | translateAsync }}</label>
+                <select class="form-select" id="sortByRatingAscending" formControlName="sortByRatingAscending">
+                    <option value="true" selected>{{ 'sortByAscendingRating' | translateAsync }}</option>
+                    <option value="false">{{ 'sortByDescendingRating' | translateAsync }}</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    (click)="onFilterInstitutions()">
+                    {{ 'filter' | translateAsync }}
+                </button>
+            </div>
+            
+        </div>
+    </div>
+</div>

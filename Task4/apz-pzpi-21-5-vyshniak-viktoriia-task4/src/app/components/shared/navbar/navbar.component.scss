@@ -1,0 +1,73 @@
+@mixin gradient-button($start-color, $end-color) {
+	background: linear-gradient(to right, $start-color 0%, $end-color 30%, $end-color 50%, $start-color 70%, $start-color 100%);
+	background-size: 200% auto;
+	color: #fff;
+	transition: all 0.5s ease-out;
+
+	&:hover {
+		background-position: right center;
+	}
+}
+
+.main-logo {
+	width: 15vmin;
+	height: 10vmin;
+}
+
+.btn-gradient-gold {
+	@include gradient-button(#ffc107, #f77d0b);
+}
+
+.btn-gradient-purple {
+	@include gradient-button(#315ff7, #3134f7);
+}
+
+.btn-logo {
+	background: rgba(0, 0, 0, 0);
+	border: 0;
+}
+
+.nav-item {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+.navbar-toggler {
+	margin-right: 15px;
+
+	i {
+		transition: transform 0.2s ease-in-out;
+
+		&:not(.collapsed) {
+			transform: rotate(90deg);
+		}
+	}
+}
+
+.locale-list {
+	border-radius: 1vmin;
+	padding: 1vmin;
+}
+
+a {
+	outline: none;
+	text-decoration: none;
+	color: gray;
+}
+
+li.active {
+	a {
+		color: #315ff7;
+		text-decoration: underline;
+	}
+}
+
+.btn-link {
+	text-decoration: none !important;
+	color: gray !important;
+
+	&:hover {
+		color: #315ff7;
+		text-decoration: underline;
+	}
+}

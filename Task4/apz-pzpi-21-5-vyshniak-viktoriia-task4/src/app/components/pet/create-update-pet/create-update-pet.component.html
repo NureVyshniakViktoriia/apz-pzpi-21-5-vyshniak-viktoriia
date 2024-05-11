@@ -1,0 +1,115 @@
+<div class="main-container">
+	<div class="row">
+		<div class="md-9">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link" (click)="onTabClick('pet')" [class.active]="activeTab === 'pet'">
+						{{ 'pet' | translateAsync }}
+					</a>
+				</li>
+		
+				<li class="nav-item" *ngIf="petId?.toString() != emptyGuid">
+					<a class="nav-link" (click)="onTabClick('diary-notes')" [class.active]="activeTab === 'diary-notes'">
+						{{ 'diaryNotes' | translateAsync }}
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div *ngIf="activeTab === 'pet'" class="tab-content">
+		<div class="row">
+			<div class="col-md-6 mt-3">
+				<form *ngIf="petForm" [formGroup]="petForm" (ngSubmit)="applyPet()">
+
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label for="nickName" class="form-label">{{ 'nickName' | translateAsync }}</label>
+							<input type="text" class="form-control" id="nickName" formControlName="nickName" />
+							<div *ngIf="petForm.get('nickName')?.hasError('required') && petForm.get('nickName')?.touched" class="text-danger">
+								<small>{{ 'nickName' | translateAsync }} {{ 'required' | translateAsync }}</small>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<label for="breed" class="form-label">{{ 'breed' | translateAsync }}</label>
+							<input type="text" class="form-control" id="breed" formControlName="breed" />
+						</div>
+					</div>
+		
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label for="petType" class="form-label">{{ 'petType' | translateAsync }}</label>
+							<select class="form-select" id="petType" formControlName="petType">
+								<option *ngFor="let option of getPetTypeOptions()" [ngValue]="option.value">
+									{{ option.label }}
+								</option>
+							</select>
+						</div>
+		
+						<div class="col-md-6">
+							<label for="birthDate" class="form-label">{{ 'birthDate' | translateAsync }}</label>
+							<input type="date" class="form-control" id="birthDate" formControlName="birthDate" />
+							<div *ngIf="petForm.get('birthDate')?.hasError('required') && petForm.get('birthDate')?.touched" class="text-danger">
+								<small>{{ 'birthDate' | translateAsync }} {{ 'required' | translateAsync }}</small>
+							</div>
+						</div>
+					</div>
+		
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label for="weight" class="form-label">{{ 'weight' | translateAsync }}</label>
+							<input type="number" class="form-control" id="weight" formControlName="weight" />
+							<div *ngIf="petForm.get('weight')?.hasError('required') && petForm.get('weight')?.touched" class="text-danger">
+								<small>{{ 'weight' | translateAsync }} {{ 'required' | translateAsync }}</small>
+							</div>
+						</div>
+		
+						<div class="col-md-6">
+							<label for="height" class="form-label">{{ 'height' | translateAsync }}</label>
+							<input type="number" class="form-control" id="height" formControlName="height" />
+							<div *ngIf="petForm.get('height')?.hasError('required') && petForm.get('height')?.touched" class="text-danger">
+								<small>{{ 'height' | translateAsync }} {{ 'required' | translateAsync }}</small>
+							</div>
+						</div>
+					</div>
+		
+					<div class="mb-3">
+						<label for="characteristics" class="form-label">{{ 'characteristics' | translateAsync }}</label>
+						<textarea class="form-control" id="characteristics" formControlName="characteristics"></textarea>
+						<div *ngIf="petForm.get('characteristics')?.hasError('required') && petForm.get('characteristics')?.touched" class="text-danger">
+							<small>{{ 'characteristics' | translateAsync }} {{ 'required' | translateAsync }}</small>
+						</div>
+					</div>
+		
+					<div class="mb-3">
+						<label for="illnesses" class="form-label">{{ 'illnesses' | translateAsync }}</label>
+						<textarea class="form-control" id="illnesses" formControlName="illnesses"></textarea>
+						<div *ngIf="petForm.get('illnesses')?.hasError('required') && petForm.get('illnesses')?.touched" class="text-danger">
+							<small>{{ 'illnesses' | translateAsync }} {{ 'required' | translateAsync }}</small>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label for="preferences" class="form-label">{{ 'preferences' | translateAsync }}</label>
+						<textarea class="form-control" id="preferences" formControlName="preferences"></textarea>
+						<div *ngIf="petForm.get('preferences')?.hasError('required') && petForm.get('preferences')?.touched" class="text-danger">
+							<small>{{ 'preferences' | translateAsync }} {{ 'required' | translateAsync }}</small>
+						</div>
+					</div>
+		
+					<div class="mb-3">
+						<button type="submit" class="btn btn-primary">{{ 'save' | translateAsync }}</button>
+					</div>
+				</form>
+			</div>		
+		</div>
+	</div>
+	
+	<div *ngIf="activeTab === 'diary-notes'" class="tab-content">
+		<div class="row">
+			<app-diary-note-list [petId]="this.petId"></app-diary-note-list>
+		</div>
+	</div>
+	
+</div>

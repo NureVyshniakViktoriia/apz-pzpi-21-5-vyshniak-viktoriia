@@ -1,0 +1,49 @@
+
+<div class="modal-content">
+	<div class="modal-header">
+		<h5 class="modal-title">
+			{{ this.petId }}
+		</h5>
+		<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close(false)"></button>
+	</div>
+	<div class="modal-body">
+		<form *ngIf="configurePetDeviceForm" [formGroup]="configurePetDeviceForm">
+			<input name="petId" hidden value="{{ this.petId }}"/>
+
+			<div class="mb-3">
+				<label for="petDeviceIpAddress" class="form-label">
+					{{ 'petDeviceIpAddress' | translateAsync }}
+				</label>
+				<input type="text" readonly class="form-control" id="petDeviceIpAddress" formControlName="petDeviceIpAddress" />
+			</div>
+
+			<hr>
+
+			<div formGroupName="wifiSettings">
+				<div class="mb-3">
+					<label for="ssid" class="form-label">
+						{{ 'ssid' | translateAsync }}
+					</label>
+					<input type="text" class="form-control" id="ssid" formControlName="ssid" />
+				</div>
+			
+				<div class="mb-3">
+					<label for="password" class="form-label">
+						{{ 'wifiPassword' | translateAsync }}
+					</label>
+					<input type="text" class="form-control" id="password" formControlName="password" />
+				</div>
+			</div>
+
+			<button type="button" class="btn btn-primary mt-2" (click)="configurePetDevice()">
+				{{ 'configurePetDevice' | translateAsync }}
+			</button>
+
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn px-5 mx-2 btn-danger" (click)="activeModal.close(false)">
+			{{ 'close' | translateAsync }}
+		</button>
+	</div>
+</div>

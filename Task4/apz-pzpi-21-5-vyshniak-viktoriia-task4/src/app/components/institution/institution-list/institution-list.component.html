@@ -1,0 +1,40 @@
+<div class="main-container">
+	<div class="btn-container mb-3">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>{{ 'ID' | translateAsync }}</th>
+					<th>{{ 'name' | translateAsync }}</th>
+					<th>{{ 'institutionType' | translateAsync }}</th>
+					<th>{{ 'region' | translateAsync }}</th>
+					<th>{{ 'rating' | translateAsync }}</th>
+					<th>{{ 'actionHeader' | translateAsync }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let institution of institutions$ | async">
+					<td>{{ institution.institutionId }}</td>
+					<td>{{ institution.name }}</td>
+					<td>{{ getInstitutionTypeName(institution.institutionType)}}</td>
+					<td>{{ getRegionName(institution.region) }}</td>
+					<td>{{ institution.rating.mark }}</td>
+					<td class="actions">
+						<ng-container *ngIf="isAdmin; else userView">
+							<button class="btn btn-info" (click)="edit(institution.institutionId)">
+								{{ 'editButton' | translateAsync }}
+							</button>
+							<button class="btn btn-danger" (click)="delete(institution.institutionId)">
+								{{ 'deleteButton' | translateAsync }}
+							</button>
+						</ng-container>
+						<ng-template #userView>
+							<button class="btn btn-primary" (click)="onView(institution.institutionId)">
+								{{ 'viewButton' | translateAsync }}
+							</button>
+						</ng-template>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

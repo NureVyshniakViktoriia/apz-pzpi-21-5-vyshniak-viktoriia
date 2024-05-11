@@ -1,0 +1,43 @@
+@import 'bootstrap/scss/bootstrap';
+@import '../node_modules/ngx-toastr/toastr.css';
+@import '../src/app/app.component.scss';
+
+html {
+    height: calc(100% - 12vmin);
+}
+
+body, app-root {
+    height: 100%;
+}
+
+.main-container {
+    padding: 2vmin;
+    background-color: white;
+
+    .btn-container {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        margin-bottom: 3vmin;
+    }
+
+    table .actions {
+        display: flex;
+        justify-content: center;
+        gap: 3vmin;
+    }
+}
+
+.page-container {
+    margin: 1vmin 8vmin;
+    width: 80% !important;
+    background-color: white !important;
+    min-height: 30vmin;
+    max-height: 85vmin;
+    border-radius: 2vmin;
+    overflow: auto;
+
+    &:has(.registration-container), &:has(.login-container) {
+        background-color: unset !important;
+    }
+}

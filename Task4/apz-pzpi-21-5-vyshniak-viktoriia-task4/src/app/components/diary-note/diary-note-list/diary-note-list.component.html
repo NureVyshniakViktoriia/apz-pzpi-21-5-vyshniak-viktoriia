@@ -1,0 +1,41 @@
+<div class="row">
+	<div class="col-md-12">
+		<div class="row justify-content-center my-3">
+			<div class="col-md-6">
+				<h5 class="card-title">{{ 'diaryNotes' | translateAsync }}</h5>
+			</div>
+			<div class="col-6 text-center">
+				<button class="btn btn-primary" (click)="onAddNote()">
+					{{ 'addNote' | translateAsync }}
+				</button>
+			</div>
+		</div>
+
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>{{ 'title' | translateAsync }}</th>
+					<th>{{ 'createdOnUtc' | translateAsync }}</th>
+					<th>{{ 'lastUpdatedOnUtc' | translateAsync }}</th>
+					<th>{{ 'actionHeader' | translateAsync }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="diary-note-item" *ngFor="let note of diaryNotes$ | async">
+					<td>{{ note.title }}</td>
+					<td>{{ note.createdOnUtc | l10nDateAsync }}</td>
+					<td>{{ note.lastUpdatedOnUtc | l10nDateAsync }}</td>
+
+					<td class="actions">
+						<button class="btn btn-info" (click)="openDiaryNoteModal(note.diaryNoteId)">
+							{{ 'editButton' | translateAsync }}
+						</button>
+						<button class="btn btn-danger" (click)="onDeleteNote(note.diaryNoteId)">
+							{{ 'deleteButton' | translateAsync }}
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

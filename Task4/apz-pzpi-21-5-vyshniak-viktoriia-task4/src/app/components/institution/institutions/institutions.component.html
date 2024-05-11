@@ -1,0 +1,30 @@
+<div class="main-container">
+	
+	<app-institution-filter *ngIf="!isAdmin" (filterChange)="onFilterChange($event)"></app-institution-filter>
+
+	<ng-container *ngIf="isAdmin">
+		<div class="row justify-content-end">
+			<div class="col-6 text-center">
+				<button class="btn btn-primary" (click)="onAddNewInstitution()">
+				{{ 'addInstitution' | translateAsync }}
+				</button>
+			</div>
+		</div>
+	</ng-container>
+	
+	<ng-container *ngIf="!this.isLoading">
+		<app-institution-list 
+			[isAdmin]="isAdmin" 
+			[institutions$]="institutions$"
+			(editInstitution)="onEditInstitution($event)"
+			(deleteInstitution)="onDeleteInstitution($event)"
+			(viewInstitution)="onViewInstitution($event)">
+		</app-institution-list>
+	</ng-container>
+
+	<div class="text-center parent-container">
+		<div *ngIf="this.isLoading" class="bars"></div>
+	</div>
+
+</div>
+  

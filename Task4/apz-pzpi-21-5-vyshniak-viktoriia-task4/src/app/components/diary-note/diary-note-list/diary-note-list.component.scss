@@ -1,0 +1,17 @@
+.diary-note-list {
+	.diary-note-item {
+		border-bottom: 1px solid #ccc;
+		padding: 10px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		input[type="checkbox"] {
+			margin-left: 10px;
+		}
+	}
+}

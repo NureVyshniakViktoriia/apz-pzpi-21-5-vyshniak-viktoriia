@@ -1,0 +1,31 @@
+<div class="modal-content">
+	<div class="modal-header">
+		<h5 class="modal-title">
+			{{ this.userLogin }}
+		</h5>
+		<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close(false)"></button>
+	</div>
+	<div class="modal-body">
+		<form *ngIf="userForm" [formGroup]="userForm">
+			<input name="userId" hidden value="{{ this.userId }}"/>
+			<div class="mb-3">
+				<label for="role" class="form-label">
+					{{ 'role' | translateAsync }}
+				</label>
+				<select class="form-select" id="role" formControlName="role">
+					<option *ngFor="let role of getRoleOptions()" [ngValue]="role.value">
+						{{ role.label }}
+					</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn px-5 mx-2 btn-danger" (click)="activeModal.close(false)">
+			{{ 'close' | translateAsync }}
+		</button>
+		<button type="button" class="btn btn-primary" (click)="setUserRole()">
+			{{ 'save' | translateAsync }}
+		</button>
+	</div>
+</div>

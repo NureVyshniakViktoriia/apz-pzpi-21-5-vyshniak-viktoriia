@@ -1,0 +1,585 @@
+1 АРХІТЕКТУРА ТА ОПИС ПРОГРАМНИХ ЗАСОБІВ
+
+Клієнтська частина розроблюваної програмної системи «Програмна система для контролю за місцезнаходженням і здоров’ям тварин та зручності відвідування закладів пет-френдлі» – односторінковий застосунок, що представляє адміністративну панель для керування користувачами, установами пет-френдлі та профілями домашніх улюбленців. Застосунок розроблений за допомогою фреймворку Angular 17 та IDE Visual Studio Code.
+Для написання клієнтської частини системи, що створюється, був використаний саме цей фреймворк, тому що він забезпечує зручну організацію коду за допомогою компонентної архітектури, а TypeScript, що використовується в якості мови програмування дозволяє підвищити читабельність коду. Цей фреймворк також ідеально підходить для створення односторінкових застосунків, що є важливим аспектом у сучасному веб-розробці. SPA дозволяють зменшити навантаження на сервер, оскільки вони перемальовують лише одну сторінку відповідно до дій користувача, не потребуючи повторного завантаження всієї сторінки з сервера. Замість цього, вони взаємодіють з сервером асинхронно, завантажуючи лише необхідні дані або ресурси за допомогою AJAX-запитів.
+Щодо архітектури застосунку, можна виділити наступну структуру: директорії «core» та «components». У директорії «components» розміщено компоненти, що знаходяться у наступних директоріях відповідно до їхнього призначення: «pet», «institution», «facility», «diary-note», «user», «login», «registration», «shared» з «navbar» та «footer». У директорії «core» розташовані моделі, константи, сервіси та допоміжні класи.
+Щодо прийнятих інженерних рішень, був використаний шаблон проєктування Dependency Injection для написання слабко зв’язного коду. Крім цього, для більш легкого спілкування з сервером було створено клас «ApiService» для обробки HTTP-запитів у застосунку Angular (див. Додаток Б «Фрагменти програмного коду»). Він використовує модуль Angular HttpClient для виконання типових операцій HTTP, таких як GET, POST, DELETE тощо. Він розроблений для взаємодії з RESTful API і містить методи для різних типів запитів HTTP.
+Система використовує JSON Web Token (JWT) для автентифікації користувачів та визначення їхніх ролей. Після того, як користувач надсилає запит на авторизацію з логіном та паролем, сервер створює токен доступу та токен оновлення. Ці токени надсилаються на веб-клієнт. Коли токен доступу закінчується, сервер за допомогою токена оновлення генерує новий без необхідності повторного введення логіну та паролю, що підвищує безпеку.
+Для автоматизації обробки токенів використовується «JwtHelperService» з бібліотеки «angular-jwt». Отримані токени з інформацією про поточного користувача зберігається в LocalStorage. Бізнес-логіка для реалізації автентифікації знаходиться в «AuthService» та «HttpRequestInterceptor». Необхідна для взаємодії з LocalStorage бізнес-логіка реалізована в «StorageService».
+Для реалізації локалізації та інтернаціоналізації в Angular використовуються бібліотеки «i18n» та «L10n». TranslationLoader використовується для завантаження перекладів з зовнішніх файлів у застосунок. L10nConfig визначає налаштування локалізації, такі як список доступних мов та шляхи до файлів перекладів. Файли JSON для кожної мови містять ключі та відповідні переклади для кожного текстового фрагменту, що використовується в застосунку, таким чином забезпечуючи можливість зміни мови інтерфейсу на льоту. Система підтримує дві локалізації: англійську та українську.
+До деяких з використаних під час розробки клієнтської частини проєкту  бібліотек відносяться наступні: «NGX Bootstrap», «HttpClient», «HttpInterceptor», «RxJs», «NGX Toastr».
+ 
+2 ПОБУДОВА ДІАГРАМИ ПРЕЦЕДЕНТІВ
+
+На діаграмі прецедентів наведено опис функціонального призначення клієнтської частини застосунку (див. Додаток А рис А.1).
+Серед акторів можна виділити неавторизованого користувача, системного адміністратора, власника установи пет-френдлі та власника домашнього улюбленця.
+Сам застосунок слугує в більшості адміністративною панеллю для налаштування установ, управління даними та конфігурації розумних пристроїв.
+Неавторизований користувач має можливість авторизуватися та зареєструватися, заповнивши відповідну анкету.
+Системний адміністратор має можливість управляти користувачами в межах системи та видавати їм відповідні права, створювати резервну копію бази даних та конфігурувати розумний пристрій для відстеження поточного місцерозташування та температури тіла домашніх улюбленців.
+Власник установи пет-френдлі має змогу створювати нові установи, редагувати та видаляти наявні, управляти послугами в межах обраної установи та конфігурувати RFID-зчитувач для адміністрування установи та контролю за тваринами-відвідувачами.
+Власник домашнього улюбленця має можливість створювати нові профілі тварин, редагувати та видаляти наявні, управляти щоденником здоров’я тварини, створюючи записи та завантажуючи відповідні медичні документи; переглядати наявні в системі установи з можливістю фільтрації, пошуку та сортування та ставити оцінку обраній установі.
+ 
+3 ПОБУДОВА ДІАГРАМИ КОМПОНЕНТІВ
+
+За допомогою діаграми компонентів побудовано структурні компоненти клієнтської частини системи, зв’язки та залежності між ними (див. Додаток А рис. А.2).
+Веб-браузер завантажує на сторінку «app-root», що знаходиться в головному компоненті застосунку «AppComponent», а далі вже у цю кореневу сторінку завантажується наповнення відповідно до обраного url. 
+У файлі «app.routes.ts» визначаються маршрути для навігації в Angular застосунку. Кожен маршрут визначається за допомогою шляху (URL) та відповідного компонента, який буде відображений при активації маршруту. 
+Файл «app.module.ts» є основним модулем Angular-застосунку, де визначається конфігурація та імпортуються всі необхідні модулі, сервіси та компоненти. Цей файл встановлює зв’язки між різними частинами застосунку та визначає його загальну структуру. 
+На діаграмі можна побачити основні компоненти системи: «registration», «diary-note-list», «user-list», «institutions», «pet-list», «facility-list», «login», які залежать від ряду сервісів.
+Практично кожен з сервісів залежить від «ApiService», інтерфейсу, що відповідає за спілкування клієнтської частини з сервером.
+Клас «HttpRequestInterceptor», що реалізує інтерфейс «HttpInterceptor», є перехоплювачем HTTP-запитів. Перехоплювачі в Angular дозволяють глобально змінювати вихідні запити або вхідні відповіді перед їх надсиланням або доставкою на сервер (див. Додаток Б «Фрагменти програмного коду»).
+Інтерфейс «StorageService» – це служба Angular, яка відповідає за керування операціями зберігання на стороні клієнта. Він переважно взаємодіє з window.sessionStorage для зберігання та отримання даних, пов’язаних із маркерами автентифікації користувачів, ролями користувачів і інформацією про поточну локалізацію.
+
+4 ПОБУДОВА ДІАГРАМИ СТАНІВ
+
+На діаграмі станів можна побачити поведінку окремо взятого об’єкту системи, чиї дії характеризуються реакцією на зовнішні чинники (див. Додаток А рис. А.3, рис. А.4 та рис. А.5).
+На рисунку А.3-A.5 детально проілюстровано переходи між різними станами під час експлуатації застосунка.
+Кожен користувач, що не має профілю, він має можливість перейти на сторінку реєстрації, де він матиме змогу заповнити відповідну анкету.
+Після успішної реєстрації користувачеві буде запропоновано авторизуватися.
+На рисунку А.3 зображено стани процесу адміністрування системи. Після успішної авторизації користувач з правами системного адміністратора має вибір між переходом до управління користувачами, де він має можливість видавати ролі іншим користувачам системи, та переходом до секції управління тваринами, де він може конфігурувати розумні пристрої для відстеження показників здоров’я та поточного місцезнаходження тварини.
+На рисунку А.4 зображено стани процесу управління пет-френдлі установами. Після успішної авторизації користувач з правами власника установи пет-френдлі переходить на сторінку з власним установами пет-френдлі в межах системи, де він може створити нову установу, редагувати та видалити наявну, завантажити логотип та управляти послугами в межах установи. Крім цього, власник установи має можливість конфігурувати RFID-зчитувач для адміністрування установою та контролю за тваринами-відвідувачами.
+На рисунку А.5 зображено стани процесу управління профілями домашніх улюбленців. Після успішної авторизації користувач з правами власника домашніх улюбленців переходить на сторінку власних домашніх улюбленців, де він переходить між станами створення нового профілю тварини, редагування та видалення вже наявного улюбленця. Крім того, він має можливість управляти щоденником здоров’я тварини, переходячи між станами створення нового запису, редагування та видалення вже наявного; має можливість завантажувати файли та отримувати вже прив’язані до запису документи.
+Кожна з форм створення або редагування об’єктів системи перевіряє на відповідність вимогам введені дані та у разі введення некоректних даних виводить відповідне сповіщення.
+ 
+5 ПОБУДОВА ДІАГРАМИ ДІЯЛЬНОСТІ
+
+На діаграмі діяльності можна побачити усі можливі дії, що виконують користувачі в межах системи (див. Додаток А рис. А.6-А.8).
+Користувач, якщо не має профілю, буде переадресований на сторінку реєстрації. Після реєстрації йому пропонується авторизуватися.
+На рисунку А.6 можна побачити основний процес взаємодії з застосунком користувача з правами доступу системного адміністратора. Можна виділити наступні дії: управління користувачами, де він має можливість створювати резервні копії користувацьких даних та управляти користувачами системи шляхом видачі відповідних прав.
+На рисунку А.7 можна побачити основний процес взаємодії з застосунком користувача з правами доступу власника установи пет-френдлі. Після успішної авторизації адміністратора закладу пет-френдлі буде переадресовано на сторінку з усіма установами, прив’язаними до нього, де він зможе управляти ними шляхом створення нових закладів, редагування та видалення наявних. Під час редагування установи користувачеві буде запропоновано завантажити логотип закладу та перейти на сторінку конфігурації RFID-зчитувача, прив’язаного до обраного закладу. Крім цього, власнику установи під час редагування закладу буде запропоновано управління послугами в межах установи з можливістю додати нову у заклад або видалити наявну.
+На рисунку А.8 продемонстровано основний процес взаємодії з застосунком користувача з правами власника домашнього улюбленця. Після успішної авторизації його буде автоматично переадресовано на сторінку з наявними установами в межах системи, де він має можливість фільтрувати, сортувати установу зі списку, переглянути інформацію про кожну установу, поставити оцінку обраному закладу пет-френдлі. Крім цього, користувачеві надається можливість переходу на сторінку управління профілями домашніх улюбленців, де він має змогу створювати нові профілі, редагувати та видаляти вже наявні в системі профілі. Під час редагування профілю домашнього улюбленця він має можливість управляти щоденником здоров’я тварини шляхом додавання та редагування записів щоденнику, завантаження та отримання відповідних медичних документів.
+Кожна виконана дія супроводжується відповідним сповіщенням про успішне або неуспішне її виконання.
+ 
+ВИСНОВКИ
+
+У результаті виконання лабораторної роботи було створено програмне забезпечення для реалізації клієнтської частини програмної системи «PawPoint». Крім цього, у ході роботи було створено діаграму прецедентів, діаграму діяльності, діаграму станів та діаграму компонентів.
+Посилання на репозиторій github: 
+https://github.com/NureVyshniakViktoriia/apz-pzpi-21-5-vyshniak-viktoriia/tree/main/Task4.
+
+ДОДАТОК Б
+Фрагменти програмного коду
+
+Код класу ApiService.ts:
+1  import { Injectable } from '@angular/core';
+2  import { environment } from '../../../environments/environment.development';
+3  import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+4  import { Observable, OperatorFunction, tap } from 'rxjs';
+5  
+6  @Injectable({
+7  	providedIn: 'root'
+8  })
+9  export class ApiService {
+10  	private baseUrl = environment.webApi;
+11  
+12  	constructor(
+13  		public http: HttpClient,
+14  	) { }
+15  
+16  	public get<T>(
+17  		url: string,
+18  		options?: {
+19  			headers?: HttpHeaders;
+20  			params?: HttpParams;
+21  		}
+22  	) : Observable<HttpResponse<T>> {
+23  		options ??= {};
+24  		return this.http.get<HttpResponse<T>>(this.baseUrl + url, options);
+25  	}
+26  
+27  	public download(
+28  		url: string,
+29  		options?: {
+30  			headers?: HttpHeaders;
+31  			params?: HttpParams;
+32  		}
+33  	) : Observable<Blob> {
+34  		options ??= {};
+35  		return this.http.get(this.baseUrl + url, { ...options, reportProgress: true, responseType: 'blob' });
+36  	}
+37  
+38  	public post<T>(
+39  		url: string,
+40  		body?: any,
+41  		options?: {
+42  			headers?: HttpHeaders;
+43  			params?: HttpParams;
+44  		}
+45  	): Observable<HttpResponse<T>> {
+46  		options ??= {};
+47  		return this.http.post<HttpResponse<T>>(this.baseUrl + url, body, options);
+48  	}
+49  
+50  	public put<T>(
+51  		url: string,
+52  		body: any,
+53  		options?: {
+54  			headers?: HttpHeaders
+55  		}
+56  	): Observable<HttpResponse<T>> {
+57  		options ??= {};
+58  
+59  		return this.http.put<HttpResponse<T>>(this.baseUrl + url, body, options);
+60  	}
+61  
+62  	public delete<T>(
+63  		url: string,
+64  		options?: {
+65  			headers?: HttpHeaders;
+66  			params?: HttpParams;
+67  			body?: any;
+68  		}
+69  	): Observable<HttpResponse<T>> {
+70  		options ??= {};
+71  
+72  		return this.http.delete<HttpResponse<T>>(this.baseUrl + url, options);
+73  	}
+74  
+75  	public login<T>(
+76  		url: string,
+77  		body?: any,
+78  		options?: {
+79  			headers?: HttpHeaders;
+80  			params?: HttpParams;
+81  		}
+82  	): Observable<HttpResponse<T>> {
+83  		options ??= {};
+84  		return this.http.post<HttpResponse<T>>(url, body, options);
+85  	}
+86  
+87  	public refresh<T>(
+88  		url: string,
+89  		options?: {
+90  			headers?: HttpHeaders;
+91  			params?: HttpParams;
+92  		}
+93  	): Observable<HttpResponse<T>> {
+94  		options ??= {};
+95  
+96  		return this.http.get<HttpResponse<T>>(url, options);
+97  	}
+98  }
+99  
+100  export function extractData<T>(parseDate: boolean = false): OperatorFunction<any, any> {
+101  	return (source: Observable<T>) =>
+102  		source.pipe(tap(data => data));
+103  }
+104  
+105  export function formatString(source: string, args: { [key: string]: string | number | boolean } | Array<string | number>): string {
+106  	if (!source || source === '')
+107  		return source;
+108  
+109  	return Array.isArray(args)
+110  		? args.reduce((accumulator: string, value, index) => accumulator.replace(`{${index}}`, value?.toString()), source) as string
+111  		: Object.entries(args).reduce((accumulator, [key, value]) => accumulator.replace(`{${key}}`, value?.toString()), source);
+112  }
+Код класу HttpRequestInterceptor.ts:
+1  import { HTTP_INTERCEPTORS, HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+2  import { Injectable } from '@angular/core';
+3  import { Observable, catchError, switchMap, throwError } from 'rxjs';
+4  import { StorageService } from '../services/storage.service';
+5  import { AuthService } from '../services/auth.service';
+6  import { Router } from '@angular/router';
+7  import { Token } from '../models/auth/token';
+8  import { L10nTranslationService } from 'angular-l10n';
+9  
+10  @Injectable({
+11  	providedIn: 'root'
+12  })
+13  export class HttpRequestInterceptor implements HttpInterceptor {
+14  	private isRefreshing = false;
+15  
+16  	constructor(
+17  		private storageService: StorageService,
+18  		private translation: L10nTranslationService,
+19  		private authService: AuthService,
+20  		private router: Router
+21  	) { }
+22  
+23  	intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+24  		var token: Token = this.storageService.getToken();
+25  		if (!token) {
+26  			return next.handle(req);
+27  		}
+28  
+29  		req = req.clone({
+30  			headers: req.headers
+31  				.set('Authorization', `Bearer ${token.accessToken}`)
+32  				.set('Accept-Language', this.translation.getLocale().language),
+33  		});
+34  
+35  		return next.handle(req).pipe(
+36  			catchError((error) => {
+37  				if (error instanceof HttpErrorResponse
+38  					&& error.status === 401) {
+39  					return this.handle401Error(req, next);
+40  				}
+41  
+42  				return throwError(() => error);
+43  			})
+44  		);
+45  	}
+46  
+47  	private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
+48  		if (!this.isRefreshing) {
+49  			this.isRefreshing = true;
+50  
+51  			if (this.storageService.isLoggedIn()) {
+52  				var token: Token = this.storageService.getToken();
+53  
+54  				return this.authService.refresh(token.refreshToken).pipe(
+55  					switchMap((result) => {
+56  						this.isRefreshing = false;
+57  						this.storageService.saveToken(result);
+58  
+59  						return next.handle(request.clone({
+60  							headers: request.headers.delete('Authorization')
+61  								.set('Authorization', `Bearer ${result.accessToken}`),
+62  					}));
+63  				}),
+64  				catchError((error) => {
+65  					this.isRefreshing = false;
+66  
+67  					if (error.status == '403') {
+68  						this.storageService.clear();
+69  						this.router.navigate(['login']);
+70  					}
+71  
+72  					return throwError(() => error);
+73  				}));
+74  			}
+75  		}
+76  
+77  		return next.handle(request);
+78  	}
+79  }
+80  
+81  export const httpInterceptorProviders = [
+82  	{
+83  		provide: HTTP_INTERCEPTORS,
+84  		useClass: HttpRequestInterceptor,
+85  		multi: true
+86  	},
+87  ];
+Код класу StorageService.ts:
+1  import { Injectable } from '@angular/core';
+2  import { JwtHelperService } from '@auth0/angular-jwt';
+3  import { Token } from '../models/auth/token';
+4  
+5  const USER_TOKEN = 'auth-user';
+6  const USER_CULTURE = 'locale';
+7  
+8  @Injectable({
+9  	providedIn: 'root'
+10  })
+11  export class StorageService {
+12  
+13  	constructor(
+14  		private jwtHelper: JwtHelperService
+15  	) { }
+16  
+17  	public clear(): void {
+18  		window.sessionStorage.clear();
+19  	}
+20  
+21  	public saveToken(data: Token): void {
+22  		window.sessionStorage.removeItem(USER_TOKEN);
+23  		window.sessionStorage.setItem(USER_TOKEN, JSON.stringify(data));
+24  	}
+25  
+26  	public getToken(): Token {
+27  		const data = window.sessionStorage.getItem(USER_TOKEN);
+28  		if (data) {
+29  			return JSON.parse(data) as Token;
+30  		}
+31  
+32  		return {
+33  			accessToken: "",
+34  			refreshToken: ""
+35  		} as Token;
+36  	}
+37  
+38  	public isLoggedIn(): boolean {
+39  		const user = window.sessionStorage.getItem(USER_TOKEN);
+40  		if (user) {
+41  			return true;
+42  		}
+43  
+44  		return false;
+45  	}
+46  
+47  	public isAdmin(): boolean {
+48  		if (!this.isLoggedIn()){
+49  			return false;
+50  		}
+51  
+52  		const user = window.sessionStorage.getItem(USER_TOKEN);
+53  		if (user == null) {
+54  			return false;
+55  		}
+56  
+57  		const token = JSON.parse(user)
+58  		const accessToken = token['accessToken'];
+59  		const decodedToken = this.jwtHelper.decodeToken(accessToken);
+60  		decodedToken['role'];
+61  
+62  		return (decodedToken['role'] === 'Admin');
+63  	}
+64  
+65  	public getUserRole(): string {
+66  		if (!this.isLoggedIn()){
+67  			return "";
+68  		}
+69  
+70  		const user = window.sessionStorage.getItem(USER_TOKEN);
+71  		if (user == null) {
+72  			return "";
+73  		}
+74  
+75  		const token = JSON.parse(user)
+76  		const accessToken = token['accessToken'];
+77  		const decodedToken = this.jwtHelper.decodeToken(accessToken);
+78  		decodedToken['role'];
+79  
+80  		return decodedToken['role'];
+81  	}
+82  
+83  	public getCurrentUserId(): number {
+84  		const user = window.sessionStorage.getItem(USER_TOKEN);
+85  		if (user == null) {
+86  			return -1;
+87  		}
+88  
+89  		const token = JSON.parse(user);
+90  		const accessToken = token['accessToken'];
+91  		const decodedToken = this.jwtHelper.decodeToken(accessToken);
+92  
+93  		return decodedToken['id'];
+94  	}
+95  
+96  	public saveLocale(locale: string) {
+97  		window.sessionStorage.removeItem(USER_CULTURE);
+98  		window.sessionStorage.setItem(USER_CULTURE, locale);
+99  	}
+100  
+101  	public getLocale() {
+102  		const data = window.sessionStorage.getItem(USER_CULTURE);
+103  		return data;
+104  	}
+105  }
+Код класу AuthService.ts:
+1  import { Injectable } from '@angular/core';
+2  import { LoginModel } from '../models/auth/login-model';
+3  import { Observable } from 'rxjs';
+4  import { HttpHeaders, HttpParams } from '@angular/common/http';
+5  import { Token } from '../models/auth/token';
+6  import { ApiService, extractData } from './api.service';
+7  import { api } from '../constants/api-constants';
+8  
+9  @Injectable({
+10  	providedIn: 'root'
+11  })
+12  export class AuthService {
+13  
+14  	constructor(
+15  		private http: ApiService
+16  	) { }
+17  
+18  	public login(loginModel: LoginModel): Observable<Token> {
+19  		const url = api.auth.login;
+20  		return this.http.post(url, loginModel).pipe(extractData(true));
+21  	}
+22  
+23  	public refresh(refreshTokenString: string): Observable<Token> {
+24  		const url = api.auth.refresh;
+25  		const options = {
+26  			params: new HttpParams(),
+27  			headers: new HttpHeaders().append('refreshTokenString', refreshTokenString)
+28  		}
+29  
+30  		return this.http.get(url, options).pipe(extractData(true));
+31  	}
+32  }
+Код файлу InstitutionsComponent.ts:
+1  import { Component } from '@angular/core';
+2  import { Router } from '@angular/router';
+3  import { Observable, of } from 'rxjs';
+4  import { InstitutionListItem } from '../../../core/models/institution/institution-list-item';
+5  import { InsitutionService } from '../../../core/services/institution.service';
+6  import { StorageService } from '../../../core/services/storage.service';
+7  import { InstitutionFilter } from '../../../core/models/institution/institution-filter';
+8  import { InstitutionType } from '../../../core/enums/institution-type';
+9  
+10  @Component({
+11  	selector: 'app-institutions',
+12  	templateUrl: './institutions.component.html',
+13  	styleUrl: './institutions.component.scss'
+14  })
+15  export class InstitutionsComponent {
+16  	institutions$!: Observable<InstitutionListItem[]>;
+17  	isLoading: boolean = false;
+18  	currentUserId!: number;
+19  	isAdmin!: boolean;
+20  	
+21  	institutionFilter: InstitutionFilter = {
+22  		searchQuery: '',
+23  		type: InstitutionType.All,
+24  		sortByRatingAscending: true,
+25  		pageSize: 10,
+26  		pageCount: 1
+27  	};
+28  
+29  	constructor(
+30  		private router: Router,
+31  		private institutionService: InsitutionService,
+32  		private storageService: StorageService
+33  	) { }
+34  
+35  	ngOnInit(): void {
+36  		this.currentUserId = this.storageService.getCurrentUserId();
+37  		this.isAdmin = this.storageService.isAdmin();
+38  
+39  		this.loadInstitutions();
+40  	}
+41  
+42  	loadInstitutions() {
+43  		this.isLoading = true;
+44  		if (this.isAdmin) {
+45  			this.institutionService.getAllByOwnerId(this.currentUserId).subscribe({
+46  				next: (result: InstitutionListItem[]) => {
+47  					this.institutions$ = of(result);
+48  				},
+49  				complete: () => {
+50  					this.isLoading = false;
+51  				}
+52  			});
+53  
+54  			return;
+55  		}
+56  
+57  		this.institutionService.list(this.institutionFilter).subscribe({
+58  			next: (result: InstitutionListItem[]) => {
+59  				this.institutions$ = of(result);
+60  			},
+61  			complete: () => {
+62  				this.isLoading = false;
+63  			}
+64  		});
+65  	}
+66  
+67  	onEditInstitution(institutionId: number) {
+68  		this.router.navigate(['/institution-create-update', institutionId]);
+69  	}
+70  
+71  	onDeleteInstitution(institutionId: number) {
+72  		this.institutionService.delete(institutionId).subscribe(
+73  			() => {
+74  				this.loadInstitutions();
+75  			},
+76  		);
+77  	}
+78  
+79  	onAddNewInstitution() {
+80  		this.router.navigate(['/institution-create-update', -1]);
+81  	}
+82  
+83  	onViewInstitution(institutionId: number) {
+84  		this.router.navigate(['/institution-view', institutionId]);
+85  	}
+86  
+87  	onFilterChange(institutionFilter: InstitutionFilter) {
+88  		this.institutionFilter = institutionFilter;
+89  		this.loadInstitutions();
+90  	}
+91  }
+Код файлу InstitutionsComponent.html:
+1  import { Component } from '@angular/core';
+2  import { Router } from '@angular/router';
+3  import { Observable, of } from 'rxjs';
+4  import { InstitutionListItem } from '../../../core/models/institution/institution-list-item';
+5  import { InsitutionService } from '../../../core/services/institution.service';
+6  import { StorageService } from '../../../core/services/storage.service';
+7  import { InstitutionFilter } from '../../../core/models/institution/institution-filter';
+8  import { InstitutionType } from '../../../core/enums/institution-type';
+9  
+10  @Component({
+11  	selector: 'app-institutions',
+12  	templateUrl: './institutions.component.html',
+13  	styleUrl: './institutions.component.scss'
+14  })
+15  export class InstitutionsComponent {
+16  	institutions$!: Observable<InstitutionListItem[]>;
+17  	isLoading: boolean = false;
+18  	currentUserId!: number;
+19  	isAdmin!: boolean;
+20  	
+21  	institutionFilter: InstitutionFilter = {
+22  		searchQuery: '',
+23  		type: InstitutionType.All,
+24  		sortByRatingAscending: true,
+25  		pageSize: 10,
+26  		pageCount: 1
+27  	};
+28  
+29  	constructor(
+30  		private router: Router,
+31  		private institutionService: InsitutionService,
+32  		private storageService: StorageService
+33  	) { }
+34  
+35  	ngOnInit(): void {
+36  		this.currentUserId = this.storageService.getCurrentUserId();
+37  		this.isAdmin = this.storageService.isAdmin();
+38  
+39  		this.loadInstitutions();
+40  	}
+41  
+42  	loadInstitutions() {
+43  		this.isLoading = true;
+44  		if (this.isAdmin) {
+45  			this.institutionService.getAllByOwnerId(this.currentUserId).subscribe({
+46  				next: (result: InstitutionListItem[]) => {
+47  					this.institutions$ = of(result);
+48  				},
+49  				complete: () => {
+50  					this.isLoading = false;
+51  				}
+52  			});
+53  
+54  			return;
+55  		}
+56  
+57  		this.institutionService.list(this.institutionFilter).subscribe({
+58  			next: (result: InstitutionListItem[]) => {
+59  				this.institutions$ = of(result);
+60  			},
+61  			complete: () => {
+62  				this.isLoading = false;
+63  			}
+64  		});
+65  	}
+66  
+67  	onEditInstitution(institutionId: number) {
+68  		this.router.navigate(['/institution-create-update', institutionId]);
+69  	}
+70  
+71  	onDeleteInstitution(institutionId: number) {
+72  		this.institutionService.delete(institutionId).subscribe(
+73  			() => {
+74  				this.loadInstitutions();
+75  			},
+76  		);
+77  	}
+78  
+79  	onAddNewInstitution() {
+80  		this.router.navigate(['/institution-create-update', -1]);
+81  	}
+82  
+83  	onViewInstitution(institutionId: number) {
+84  		this.router.navigate(['/institution-view', institutionId]);
+85  	}
+86  
+87  	onFilterChange(institutionFilter: InstitutionFilter) {
+88  		this.institutionFilter = institutionFilter;
+89  		this.loadInstitutions();
+90  	}
+91  }
