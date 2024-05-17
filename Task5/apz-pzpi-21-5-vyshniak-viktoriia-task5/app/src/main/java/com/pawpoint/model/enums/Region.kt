@@ -1,0 +1,30 @@
+package com.pawpoint.model.enums
+
+enum class Region {
+    Vinnytsia,
+    Volyn,
+    Dnipro,
+    Donetsk,
+    Zhytomyr,
+    Zakarpattia,
+    Zaporizhia,
+    Ivano__Frankivsk,
+    Kyiv,
+    Kirovohrad,
+    Lugansk,
+    Lviv,
+    Mykolaiv,
+    Odesa,
+    Poltava,
+    Rivne,
+    Sumy,
+    Ternopil,
+    Kharkiv,
+    Kherson,
+    Khmelnytskyi,
+    Cherkasy,
+    Chernivtsi,
+    Chernihiv,
+    Sevastopol,
+    Kyiv_City
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/pets"
+        android:icon="@drawable/animals_icon"
+        android:title="Pets" />
+
+    <item
+        android:id="@+id/institutions"
+        android:icon="@drawable/institutions_icon"
+        android:title="Institutions" />
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/profile_icon"
+        android:title="Profile" />
+</menu>

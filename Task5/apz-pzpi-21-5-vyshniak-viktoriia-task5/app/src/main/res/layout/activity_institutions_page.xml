@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activity.InstitutionsPage">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/light_purple2">
+
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                app:layout_scrollFlags="scroll|enterAlways">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="35dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/searchField"
+                        android:layout_width="200dp"
+                        android:layout_height="50dp"
+                        android:background="@color/white"
+                        android:fontFamily="@font/alata"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/searchButton"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:background="@color/white"
+                            android:clickable="true"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/search_icon" />
+
+                        <TextView
+                            android:layout_width="60dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center_horizontal"
+                            android:background="@color/white"
+                            android:fontFamily="@font/alata"
+                            android:gravity="center_horizontal"
+                            android:text="@string/msg13"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="5dp"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/resetButton"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:background="@color/white"
+                            android:clickable="true"
+                            android:contentDescription="@string/msg14"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/reset_icon" />
+
+                        <TextView
+                            android:layout_width="60dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center_horizontal"
+                            android:background="@color/white"
+                            android:fontFamily="@font/alata"
+                            android:gravity="center_horizontal"
+                            android:text="@string/msg14"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="5dp"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/sortButton"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:background="@color/white"
+                            android:clickable="true"
+                            android:contentDescription="@string/msg15"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/sort_icon" />
+
+                        <TextView
+                            android:layout_width="60dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center_horizontal"
+                            android:background="@color/white"
+                            android:fontFamily="@font/alata"
+                            android:gravity="center_horizontal"
+                            android:text="@string/msg16"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            app:tabGravity="center"
+            app:tabMode="scrollable">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg17" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/hospital"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg18" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/cafe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg19" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/gym"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg20" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/saloon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg21" />
+        </com.google.android.material.tabs.TabLayout>
+
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:isScrollContainer="true"
+                android:scrollbarAlwaysDrawHorizontalTrack="true"
+                android:scrollbarAlwaysDrawVerticalTrack="true">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycle_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp" />
+            </RelativeLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+</FrameLayout>
