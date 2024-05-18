@@ -209,8 +209,7 @@ class PetInfo : AppCompatActivity() {
                     if (response.isSuccessful) {
                         val dataList = response.body()
                         if (dataList != null) {
-                            currentLocationField.text = dataList.addressData.address + ", " +
-                                    dataList.addressData.city + ", " + dataList.addressData.country
+                            currentLocationField.text = dataList.addressData.address
                         }
                     } else {
                         Toast.makeText(activity, "Something went wrong!", Toast.LENGTH_LONG)

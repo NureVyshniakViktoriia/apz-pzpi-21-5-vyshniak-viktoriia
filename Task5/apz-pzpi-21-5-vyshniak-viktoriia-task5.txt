@@ -1,0 +1,747 @@
+1 АРХІТЕКТУРА ТА ОПИС ПРОГРАМНИХ ЗАСОБІВ
+
+Мобільний застосунок розроблюваної програмної системи «Програмна система для контролю за місцезнаходженням і здоров’ям тварин та зручності відвідування закладів пет-френдлі» – Android-застосунок, що представляє адміністративну панель для керування тваринами-відвідувачами пет-френдлі установ та забезпечення якісного догляду за тваринами їхнім власникам. Застосунок розроблений за допомогою мови програмування Kotlin та середовища розробки Android Studio.
+Щодо архітектури застосунку, було використано архітектуру MVC з чітким поділом на наступні шари: шар моделей, шар бізнес-логіки та шар відображення даних. Можна виділити наступну структуру: директорії «model», «network» та «ui». У директорії «model» знаходяться enums, моделі запитів та відповідей для спілкування з сервером. У директорії «network» знаходяться інтерфейси та класи для взаємодії з сервером. У директорії «ui» знаходяться фрагменти сторінок та адаптери для відображення даних. Крім цього, наявна директорія «util», у який знаходиться допоміжний клас для перевірки даних, введених користувачем.
+Щодо прийнятих інженерних рішень, взаємодія мобільного застосунку з сервером здійснюється за допомогою бібліотеки Retrofit. Retrofit – це бібліотека для виконання HTTP-запитів, яка дозволяє зручно взаємодіяти з веб-службами, відправляти та отримувати дані з сервера.
+Використання Retrofit полягає у створенні інтерфейсу, який описує запити до сервера. Цей інтерфейс містить анотації, що визначають різні аспекти запиту, такі як URL, тип запиту, та інші параметри. У класі «ApiService» визначаються всі необхідні кінцеві точки для комунікації з Web API. 
+Клас «ApiRepositoryImpl» відповідає за реалізацію інтерфейсу «ApiRepository», забезпечуючи взаємодію з «ApiService» через клієнт Retrofit. В «ApiRepositoryImpl» реєструється клієнт Retrofit, який використовується для створення запитів до кінцевих точок, визначених в «ApiService».
+Система використовує JSON Web Token для автентифікації користувачів та визначення їхніх ролей. Після того, як користувач надсилає запит на авторизацію з логіном та паролем, сервер створює токен доступу та токен оновлення. Ці токени надсилаються на веб-клієнт. Для збереження JWT токена доступу використовується Intent. При переході до основної сторінки користувача створюється новий Intent, до якого додаються параметри userId і токен доступу. При завантаженні основної сторінки користувача відбувається отримання переданих даних з Intent. У методі getExtra() перевіряється наявність додаткових параметрів у Intent (див. Додаток Б «Фрагменти програмного коду»). Якщо параметри присутні, витягуються userId і токен доступу, який потім додається до заголовку запиту для авторизації.
+Для реалізації локалізації в мобільному застосунку використовуються XML-файли з ресурсами, які автоматично завантажуються системою залежно від обраної локалізації. У системі підтримується дві локалізації: українська та англійська. Для встановлення локалізації використовується метод setLocale(languageCode), який приймає код мови (наприклад, «en» для англійської або «uk» для української) і змінює поточну локалізацію застосунку (див. Додаток Б «Фрагменти програмного коду»). Локалізація впливає на відображення тексту згідно з таблицею символів, що відповідає обраній локалізації.
+Щодо маршрутизації, на основних сторінках застосунку розташовано компонент Bottom NavigationView, який відповідає за навігацію між різними розділами застосунку. Кожна іконка в Bottom NavigationView відповідає певному розділу, і при натисканні на неї виконується перехід на відповідну сторінку.
+
+2 ПОБУДОВА ДІАГРАМИ ПРЕЦЕДЕНТІВ
+
+На діаграмі прецедентів наведено опис функціонального призначення мобільного застосунку (див. Додаток А рис А.1).
+Серед акторів можна виділити неавторизованого користувача, власника установи пет-френдлі та власника домашнього улюбленця.
+Мобільна платформа слугує для контролю за місцезнаходженням та станом здоров’я тварини, а також для посилення заходів безпеки та надання індивідуального сервісу відвідувачам установ для відвідування з тваринами за допомогою нотифікацій з інформацією про домашніх улюбленців.
+Неавторизований користувач має можливість авторизуватися та зареєструватися, заповнивши відповідну анкету.
+Власник установи пет-френдлі має змогу редагувати власні дані профілю та отримувати повідомлення з загальної інформацією про тварин-відвідувачів та відповідними медичними документами.
+Власник домашнього улюбленця має можливість переглядати профілі домашніх улюбленців, прив’язаних до нього; управляти щоденником здоров’я тварини, створюючи записи та завантажуючи відповідні медичні документи; переглядати наявні в системі установи з можливістю фільтрації, пошуку та сортування та ставити оцінку обраній установі; отримувати актуальну інформацію про поточне місцезнаходження тварини та показники її здоров’я.
+
+3 ПОБУДОВА ДІАГРАМИ КОМПОНЕНТІВ
+
+За допомогою діаграми компонентів побудовано структурні компоненти мобільного застосунку системи, зв’язки та залежності між ними (див. Додаток А рис. А.2).
+Взаємодія мобільного застосунку з сервером здійснюється за допомогою бібліотеки Retrofit. В «ApiService» визначаються всі необхідні кінцеві точки для комунікації з Web API. Web API, у свою чергу, звертається до бази даних для отримання або збереження необхідної інформації.
+«ApiRepositoryImpl» відповідає за реалізацію інтерфейсу «ApiRepository», забезпечуючи взаємодію з «ApiService» через клієнт Retrofit. В «ApiRepositoryImpl» реєструється клієнт Retrofit, який використовується для створення запитів до визначених в «ApiService» кінцевих точок.
+На діаграмі можна побачити основні компоненти системи: «LoginPage», «RegisterPage», «PetsPage», «MessagesPage», «InstitutionsPage», «DiaryNotesPage», «ProfileUserPage», які залежать від сервісу «ApiService», інтерфейсу «ApiRepository» та його реалізації «ApiRepositoryImpl».
+
+4 ПОБУДОВА ER-МОДЕЛІ ДАНИХ
+
+Для того, щоб правильно розробити схему реляційної бази даних для мобільної платформи, необхідно обрати ті поняття, дані про які і будуть у подальшому там зберігатися. 
+Можна виділити наступні сутності: заклади пет-френдлі («Institutions»), домашні тварини («Pets»), користувачі («Users»), профілі користувача («UserProfiles»), рейтинги закладів («Ratings»), записи показників здоров’я тварини («HealthRecords»), записи щоденника здоров’я тварини («DiaryNotes»), послуги установ («Facilities»), повідомлення («Notifications»), токени зміни паролю («ResetPasswordTokens») та токени оновлення («RefreshTokens»). 
+Зв’язки між ними наведено за допомогою ER-моделі даних (див. Додаток А рис. А.3). Серед них можна виділити наступні:
+– установа пет-френдлі може мати 0 або багато оцінок, у свою чергу, оцінка відноситься лише до однієї установи (відношення «один-до-багатьох»);
+– установа пет-френдлі може мати 0 або багато послуг, у свою чергу, одна й та сама послуга може відноситись до 0 або багатьох установ (відношення «багато-до-багатьох»);
+– домашній улюбленець може мати 0 або багато повідомлень, у свою чергу, повідомлення відноситься лише до 0 або однієї тварини (відношення «один-до-багатьох»);
+– домашній улюбленець може мати 0 або багато записів щоденника здоров’я, у свою чергу, запис щоденника відноситься лише до однієї тварини (відношення «один-до-багатьох»);
+– домашній улюбленець може мати 0 або багато записів показників здоров’я, у свою чергу, запис показника здоров’я відноситься лише до однієї тварини (відношення «один-до-багатьох»);
+– користувач може мати 0 або багато домашніх улюбленців водночас домашній улюбленець належить одному користувачу (відношення «один-до-багатьох»); 
+– користувач може мати 0 або багато повідомлень водночас повідомлення належить одному користувачу (відношення «один-до-багатьох»);
+– користувач може мати 0 або багато закладів пет-френдлі водночас заклад пет-френдлі відноситься лише до одного користувача (відношення «один-до-багатьох»);
+– користувач може мати 0 або багато оцінок водночас оцінка відноситься лише до одного користувача (відношення «один-до-багатьох»);
+– користувач має один профіль, що відноситься лише до одного користувача (відношення «один-до-одного»);
+– користувач може мати 0 або багато токенів зміни паролю водночас токен відноситься лише до одного користувача (відношення «один-до-багатьох»);
+– користувач може мати 0 або багато токенів відновлення водночас токен відноситься лише до одного користувача (відношення «один-до-багатьох»).
+
+5 ПОБУДОВА ДІАГРАМИ ДІЯЛЬНОСТІ
+
+На діаграмі діяльності можна побачити усі можливі дії, що виконують користувачі в межах системи (див. Додаток А рис. А.4-А.5).
+Користувач, якщо не має профілю, буде переадресований на сторінку реєстрації. Після реєстрації йому пропонується авторизуватися.
+На рисунку А.4 можна побачити основний процес взаємодії з застосунком користувача з правами доступу власника установи пет-френдлі. Після успішної авторизації адміністратора закладу пет-френдлі буде переадресовано на сторінку з повідомленнями з інформацією про тварин-відвідувачів, де він зможе переглянути дані кожного домашнього улюбленця та відповідні медичні документи, що належать тварині.
+На рисунку А.5 продемонстровано основний процес взаємодії з застосунком користувача з правами власника домашнього улюбленця. Після успішної авторизації його буде автоматично переадресовано на сторінку з наявними установами в межах системи, де він має можливість фільтрувати, сортувати установу зі списку, переглянути інформацію про кожну установу, поставити оцінку обраному закладу пет-френдлі. Крім цього, користувачеві надається можливість переходу на сторінку управління профілями домашніх улюбленців, де він має змогу переглянути наявні в системі профілі. Під час перегляду даних тварини користувач має змогу управляти записами щоденника здоров’я тварини, отримувати інформацію про поточне місцезнаходження улюбленця та його актуальні показники здоров’я.
+
+ВИСНОВКИ
+
+У результаті виконання лабораторної роботи було створено програмне забезпечення для реалізації мобільного застосунку програмної системи «PawPoint». Крім цього, у ході роботи було створено діаграму прецедентів, діаграму діяльності, ER-модель даних та діаграму компонентів.
+Посилання на репозиторій github: https://github.com/NureVyshniakViktoriia/apz-pzpi-21-5-vyshniak-viktoriia/tree/main/Task5.
+Посилання на відео з захистом в YouTube: https://youtu.be/8eNVGYLkQdk
+
+ДОДАТОК Б
+Фрагменти програмного коду
+
+Код класу ApiService.kt:
+1  package com.pawpoint.network
+2  
+3  import com.pawpoint.model.request.DiaryNoteCreateRequest
+4  import com.pawpoint.model.request.DiaryNoteRequest
+5  import com.pawpoint.model.request.LoginRequest
+6  import com.pawpoint.model.request.RatingRequest
+7  import com.pawpoint.model.request.UpdateUserRequest
+8  import com.pawpoint.model.request.UserRequest
+9  import com.pawpoint.model.response.DiaryNoteDocumentModel
+10  import com.pawpoint.model.response.DiaryNoteListItem
+11  import com.pawpoint.model.response.DiaryNoteModel
+12  import com.pawpoint.model.response.FacilityListItem
+13  import com.pawpoint.model.response.GPSTrackerResponse
+14  import com.pawpoint.model.response.HealthRecordModel
+15  import com.pawpoint.model.response.InstitutionListItem
+16  import com.pawpoint.model.response.InstitutionModel
+17  import com.pawpoint.model.response.LoginResponse
+18  import com.pawpoint.model.response.NotificationListItem
+19  import com.pawpoint.model.response.NotificationModel
+20  import com.pawpoint.model.response.PetListItem
+21  import com.pawpoint.model.response.PetModel
+22  import com.pawpoint.model.response.TemperatureMonitorResponse
+23  import com.pawpoint.model.response.UserResponse
+24  import retrofit2.Call
+25  import retrofit2.http.Body
+26  import retrofit2.http.GET
+27  import retrofit2.http.Header
+28  import retrofit2.http.Headers
+29  import retrofit2.http.POST
+30  import retrofit2.http.Query
+31  import java.time.LocalDateTime
+32  
+33  interface ApiService {
+34  
+35      @Headers("Content-Type: application/json")
+36      @POST("/api/auth/login")
+37      fun login(@Body loginData: LoginRequest): Call<LoginResponse>
+38  
+39      @POST("/api/user/register")
+40      fun register(@Body registrationData: UserRequest): Call<Void>
+41  
+42      @GET("/api/user/get-user-profile")
+43      fun getUser(
+44          @Header("Authorization") token: String,
+45          @Query("userId") userId: Int
+46      ): Call<UserResponse>
+47  
+48      @POST("/api/user/update-user-info")
+49      @Headers("Content-Type: application/json")
+50      fun updateUser(
+51          @Header("Authorization") token: String,
+52          @Body user: UpdateUserRequest
+53      ): Call<Void>
+54  
+55      @GET("/api/pet/get-all-by-owner-id")
+56      fun getPetsByOwnerId(
+57          @Header("Authorization") token: String,
+58          @Query("ownerId") ownerId: Int
+59      ): Call<List<PetListItem>>
+60  
+61      @GET("/api/pet/get-pet-by-id")
+62      fun getPetById(
+63          @Header("Authorization") token: String,
+64          @Query("petId") petId: String
+65      ): Call<PetModel>
+66  
+67      @GET("/api/health-record/get-health-records")
+68      fun getHealthRecords(
+69          @Header("Authorization") token: String,
+70          @Query("petId") petId: String,
+71          @Query("startDate") startDate: LocalDateTime?,
+72          @Query("endDate") endDate: LocalDateTime?
+73      ): Call<List<HealthRecordModel>>
+74  
+75      @GET("/api/diary-note/get-all-for-pet")
+76      fun getAllForPet(
+77          @Header("Authorization") token: String,
+78          @Query("petId") petId: String
+79      ): Call<List<DiaryNoteListItem>>
+80  
+81      @GET("/api/diary-note/get-note-by-id")
+82      fun getNoteById(
+83          @Header("Authorization") token: String,
+84          @Query("diaryNoteId") diaryNoteId: String
+85      ): Call<DiaryNoteModel>
+86  
+87      @POST("/api/diary-note/apply")
+88      @Headers("Content-Type: application/json")
+89      fun createNote(
+90          @Header("Authorization") token: String,
+91          @Body diaryNoteRequest: DiaryNoteCreateRequest
+92      ): Call<Void>
+93  
+94      @POST("/api/diary-note/upload-document")
+95      @Headers("Content-Type: application/json")
+96      fun uploadDocument(
+97          @Header("Authorization") token: String,
+98          @Body diaryNoteRequest: DiaryNoteRequest
+99      ): Call<Void>
+100  
+101      @GET("/api/diary-note/download-document")
+102      fun downloadDocument(
+103          @Header("Authorization") token: String,
+104          @Query("diaryNoteId") diaryNoteId: String
+105      ): Call<DiaryNoteDocumentModel>
+106  
+107      @GET("/api/notification/get-notifications-by-user-id")
+108      fun getNotificationsByUserId(
+109          @Header("Authorization") token: String,
+110          @Query("userId") userId: Int
+111      ): Call<List<NotificationListItem>>
+112  
+113      @GET("/api/notification/get-notification-by-id")
+114      fun getNotificationById(
+115          @Header("Authorization") token: String,
+116          @Query("notificationId") notificationId: String
+117      ): Call<NotificationModel>
+118  
+119      @GET("/api/institution/list")
+120      fun getInstitutionList(
+121          @Header("Authorization") token: String,
+122          @Query("searchQuery") searchQuery: String?,
+123          @Query("type") type: Int?,
+124          @Query("sortByRatingAscending") sortByRatingAscending: Boolean?
+125      ): Call<List<InstitutionListItem>>
+126  
+127      @GET("/api/institution/get-institution-by-id")
+128      fun getInstitutionById(
+129          @Header("Authorization") token: String,
+130          @Query("institutionId") institutionId: Int
+131      ): Call<InstitutionModel>
+132  
+133      @POST("/api/institution/set-rating")
+134      @Headers("Content-Type: application/json")
+135      fun setRating(
+136          @Header("Authorization") token: String,
+137          @Body ratingRequest: RatingRequest
+138      ): Call<Void>
+139  
+140      @GET("/api/facility/get-all-by-institution-id")
+141      fun getAllFacilitiesByInstitutionId(
+142          @Header("Authorization") token: String,
+143          @Query("institutionId") institutionId: Int
+144      ): Call<List<FacilityListItem>>
+145  
+146      @GET("/api/arduino/get-pet-temperature-data")
+147      fun getCurrentPetTemp(
+148          @Header("Authorization") token: String,
+149          @Query("petId") petId: String
+150      ): Call<Double>
+151  
+152      @GET("/api/arduino/get-pet-location-data")
+153      fun getCurrentPetLocation(
+154          @Header("Authorization") token: String,
+155          @Query("petId") petId: String
+156      ): Call<GPSTrackerResponse>
+157  }
+Код класу ApiRepositoryImpl.kt:
+1  package com.pawpoint.network
+2  
+3  import com.pawpoint.model.request.DiaryNoteCreateRequest
+4  import com.pawpoint.model.request.DiaryNoteRequest
+5  import com.pawpoint.model.request.LoginRequest
+6  import com.pawpoint.model.request.RatingRequest
+7  import com.pawpoint.model.request.UpdateUserRequest
+8  import com.pawpoint.model.request.UserRequest
+9  import com.pawpoint.model.response.DiaryNoteDocumentModel
+10  import com.pawpoint.model.response.DiaryNoteListItem
+11  import com.pawpoint.model.response.DiaryNoteModel
+12  import com.pawpoint.model.response.FacilityListItem
+13  import com.pawpoint.model.response.GPSTrackerResponse
+14  import com.pawpoint.model.response.HealthRecordModel
+15  import com.pawpoint.model.response.InstitutionListItem
+16  import com.pawpoint.model.response.InstitutionModel
+17  import com.pawpoint.model.response.LoginResponse
+18  import com.pawpoint.model.response.NotificationListItem
+19  import com.pawpoint.model.response.NotificationModel
+20  import com.pawpoint.model.response.PetListItem
+21  import com.pawpoint.model.response.PetModel
+22  import com.pawpoint.model.response.TemperatureMonitorResponse
+23  import com.pawpoint.model.response.UserResponse
+24  import okhttp3.OkHttpClient
+25  import retrofit2.Callback
+26  import retrofit2.Retrofit
+27  import retrofit2.converter.gson.GsonConverterFactory
+28  import java.time.LocalDateTime
+29  
+30  class ApiRepositoryImpl : ApiRepository {
+31  
+32      private val client = OkHttpClient.Builder().build()
+33  
+34      private val retrofit = Retrofit.Builder()
+35          .baseUrl("https://7f50-91-142-173-12.ngrok-free.app")
+36          .addConverterFactory(GsonConverterFactory.create())
+37          .client(client)
+38          .build()
+39  
+40      private val service = retrofit.create(ApiService::class.java)
+41  
+42      override fun login(user: LoginRequest, callback: Callback<LoginResponse>) {
+43          service.login(user).enqueue(callback)
+44      }
+45  
+46      override fun register(user: UserRequest, callback: Callback<Void>) {
+47          service.register(user).enqueue(callback)
+48      }
+49  
+50      override fun getUser(token: String, userId: Int, callback: Callback<UserResponse>) {
+51          service.getUser(token, userId).enqueue(callback)
+52      }
+53  
+54      override fun updateUser(token: String, user: UpdateUserRequest, callback: Callback<Void>) {
+55          service.updateUser(token, user).enqueue(callback)
+56      }
+57  
+58      override fun getPetsByOwnerId(
+59          token: String, ownerId: Int,
+60          callback: Callback<List<PetListItem>>
+61      ) {
+62          service.getPetsByOwnerId(token, ownerId).enqueue(callback)
+63      }
+64  
+65      override fun getPetById(token: String, petId: String, callback: Callback<PetModel>) {
+66          service.getPetById(token, petId).enqueue(callback)
+67      }
+68  
+69      override fun getHealthRecords(
+70          token: String,
+71          petId: String,
+72          startDate: LocalDateTime?,
+73          endDate: LocalDateTime,
+74          callback: Callback<List<HealthRecordModel>>
+75      ) {
+76          service.getHealthRecords(token, petId, startDate, endDate).enqueue(callback)
+77      }
+78  
+79      override fun getAllForPet(
+80          token: String,
+81          petId: String,
+82          callback: Callback<List<DiaryNoteListItem>>
+83      ) {
+84          service.getAllForPet(token, petId).enqueue(callback)
+85      }
+86  
+87      override fun getNoteById(
+88          token: String,
+89          diaryNoteId: String,
+90          callback: Callback<DiaryNoteModel>
+91      ) {
+92          service.getNoteById(token, diaryNoteId).enqueue(callback)
+93      }
+94  
+95      override fun createNote(
+96          token: String,
+97          diaryNoteRequest: DiaryNoteCreateRequest,
+98          callback: Callback<Void>
+99      ) {
+100          service.createNote(token, diaryNoteRequest).enqueue(callback)
+101      }
+102  
+103      override fun uploadDocument(
+104          token: String,
+105          diaryNoteRequest: DiaryNoteRequest,
+106          callback: Callback<Void>
+107      ) {
+108          service.uploadDocument(token, diaryNoteRequest).enqueue(callback)
+109      }
+110  
+111      override fun downloadDocument(
+112          token: String,
+113          diaryNoteId: String,
+114          callback: Callback<DiaryNoteDocumentModel>
+115      ) {
+116          service.downloadDocument(token, diaryNoteId).enqueue(callback)
+117      }
+118  
+119      override fun getNotificationsByUserId(
+120          token: String,
+121          userId: Int,
+122          callback: Callback<List<NotificationListItem>>
+123      ) {
+124          service.getNotificationsByUserId(token, userId).enqueue(callback)
+125      }
+126  
+127      override fun getNotificationById(
+128          token: String,
+129          notificationId: String,
+130          callback: Callback<NotificationModel>
+131      ) {
+132          service.getNotificationById(token, notificationId).enqueue(callback)
+133      }
+134  
+135      override fun getInstitutionList(
+136          token: String,
+137          searchQuery: String?,
+138          type: Int?,
+139          sortByRatingAscending: Boolean,
+140          callback: Callback<List<InstitutionListItem>>
+141      ) {
+142          service.getInstitutionList(token, searchQuery, type, sortByRatingAscending)
+143              .enqueue(callback)
+144      }
+145  
+146      override fun getInstitutionById(
+147          token: String,
+148          institutionId: Int,
+149          callback: Callback<InstitutionModel>
+150      ) {
+151          service.getInstitutionById(token, institutionId).enqueue(callback)
+152      }
+153  
+154      override fun setRating(token: String, ratingRequest: RatingRequest, callback: Callback<Void>) {
+155          service.setRating(token, ratingRequest).enqueue(callback)
+156      }
+157  
+158      override fun getAllFacilitiesByInstitutionId(
+159          token: String,
+160          institutionId: Int,
+161          callback: Callback<List<FacilityListItem>>
+162      ) {
+163          service.getAllFacilitiesByInstitutionId(token, institutionId).enqueue(callback)
+164      }
+165  
+166      override fun getCurrentPetTemp(
+167          token: String,
+168          petId: String,
+169          callback: Callback<Double>
+170      ) {
+171          service.getCurrentPetTemp(token, petId).enqueue(callback)
+172      }
+173  
+174      override fun getCurrentPetLocation(
+175          token: String,
+176          petId: String,
+177          callback: Callback<GPSTrackerResponse>
+178      ) {
+179          service.getCurrentPetLocation(token, petId).enqueue(callback)
+180      }
+181  }
+Код ProfileUserPage.kt:
+1  package com.pawpoint.ui.activity
+2  
+3  import android.content.Intent
+4  import android.content.res.Configuration
+5  import android.os.Bundle
+6  import android.util.Log
+7  import android.view.LayoutInflater
+8  import android.view.View
+9  import android.view.ViewGroup
+10  import android.widget.ImageButton
+11  import android.widget.TextView
+12  import android.widget.Toast
+13  import androidx.fragment.app.Fragment
+14  import com.pawpoint.R
+15  import com.pawpoint.model.enums.Region
+16  import com.pawpoint.model.response.UserResponse
+17  import com.pawpoint.network.ApiRepositoryImpl
+18  import retrofit2.Call
+19  import retrofit2.Callback
+20  import retrofit2.Response
+21  import java.util.Locale
+22  
+23  
+24  class ProfileUserPage : Fragment() {
+25  
+26      private val activity: Fragment = this@ProfileUserPage
+27      private val apiRepository = ApiRepositoryImpl()
+28      private lateinit var token: String
+29      private lateinit var userId: String
+30      private lateinit var username: TextView
+31      private lateinit var email: TextView
+32      private lateinit var region: TextView
+33      private lateinit var signout: TextView
+34      private lateinit var language: TextView
+35      private lateinit var lang: String
+36      private lateinit var editButton: ImageButton
+37  
+38      override fun onCreate(savedInstanceState: Bundle?) {
+39          super.onCreate(savedInstanceState)
+40          arguments?.let {
+41          }
+42      }
+43  
+44      override fun onCreateView(
+45          inflater: LayoutInflater, container: ViewGroup?,
+46          savedInstanceState: Bundle?
+47      ): View {
+48          val v: View = inflater.inflate(R.layout.activity_profile_user_page, container, false)
+49          init(v)
+50          return v
+51      }
+52  
+53      private fun init(v: View) {
+54          if (MainUserPage.getUserId() == null) {
+55              userId = MainAdminPage.getUserId().toString()
+56              token = MainAdminPage.getToken().toString()
+57          } else {
+58              userId = MainUserPage.getUserId().toString()
+59              token = MainUserPage.getToken().toString()
+60          }
+61  
+62          username = v.findViewById(R.id.loginText)
+63          email = v.findViewById(R.id.emailText)
+64          region = v.findViewById(R.id.regionText)
+65          language = v.findViewById(R.id.language)
+66          editButton = v.findViewById(R.id.editUserButton)
+67  
+68          if (Locale.getDefault().language == "en") {
+69              lang = "uk"
+70              language.text = getString(R.string.msg11)
+71          } else {
+72              lang = "en"
+73              language.text = getString(R.string.msg112)
+74          }
+75  
+76          signout = v.findViewById(R.id.singOut)
+77  
+78          signout.let { s ->
+79              s.setOnClickListener {
+80                  logout()
+81              }
+82          }
+83  
+84          language.let { s ->
+85              s.setOnClickListener {
+86                  setLocale(lang)
+87                  if (lang == "en") {
+88                      lang = "uk"
+89                  } else {
+90                      lang = "en"
+91                  }
+92              }
+93          }
+94  
+95          editButton.let { s ->
+96              s.setOnClickListener {
+97                  val intent = Intent(activity.context, UpdateUser::class.java)
+98                  startActivity(intent)
+99              }
+100          }
+101  
+102          getUser()
+103      }
+104  
+105      private fun getUser() {
+106          apiRepository.getUser("Bearer " + token, userId.toInt(), object :
+107              Callback<UserResponse> {
+108              override fun onResponse(
+109                  call: Call<UserResponse>,
+110                  response: Response<UserResponse>
+111              ) {
+112                  if (response.isSuccessful) {
+113                      val user = response.body()
+114  
+115                      if (user != null) {
+116                          fillData(user)
+117                      } else {
+118                          Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG)
+119                              .show()
+120                      }
+121                  } else {
+122                      Toast.makeText(
+123                          getActivity(),
+124                          "Something went wrong!"
+125                                  + "Response " + response.code() + " " + response.message(),
+126                          Toast.LENGTH_LONG
+127                      )
+128                          .show()
+129                  }
+130              }
+131  
+132              override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+133                  Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG).show()
+134              }
+135          })
+136      }
+137  
+138      fun fillData(user: UserResponse) {
+139          val usernameText = user.login
+140          val emailText = user.email
+141          val regionText = getRegion(user.region)
+142  
+143          username.text = username.text.toString() + ": $usernameText"
+144          email.text = email.text.toString() + ": $emailText"
+145          region.text = region.text.toString() + ": $regionText"
+146      }
+147  
+148      private fun getRegion(region: Int): String {
+149          return Region.entries[region - 1].name
+150              .replace("__", "-")
+151              .replace("_", " ")
+152      }
+153  
+154      fun logout() {
+155          val intent = Intent(activity.context, LoginPage::class.java)
+156          startActivity(intent)
+157          activity.requireParentFragment().requireActivity().finish()
+158      }
+159  
+160      private fun setLocale(languageCode: String) {
+161          val locale = Locale(languageCode)
+162          Locale.setDefault(locale)
+163          val resources = activity.resources
+164          val config: Configuration = resources.configuration
+165          config.setLocale(locale)
+166          resources.updateConfiguration(config, resources.displayMetrics)
+167      }
+168  }
+Код LoginPage.kt:
+1  package com.pawpoint.ui.activity
+2  
+3  import android.content.Intent
+4  import android.os.Bundle
+5  import android.util.Log
+6  import android.view.View
+7  import androidx.activity.enableEdgeToEdge
+8  import androidx.appcompat.app.AlertDialog
+9  import androidx.appcompat.app.AppCompatActivity
+10  import androidx.core.widget.doOnTextChanged
+11  import com.auth0.jwt.JWT
+12  import com.auth0.jwt.interfaces.DecodedJWT
+13  import com.google.android.material.textfield.TextInputEditText
+14  import com.google.android.material.textfield.TextInputLayout
+15  import com.pawpoint.R
+16  import com.pawpoint.model.request.LoginRequest
+17  import com.pawpoint.model.response.LoginResponse
+18  import com.pawpoint.network.ApiRepositoryImpl
+19  import com.pawpoint.util.Validator
+20  import retrofit2.Call
+21  import retrofit2.Callback
+22  import retrofit2.Response
+23  
+24  class LoginPage : AppCompatActivity() {
+25  
+26      private val activity: AppCompatActivity = this@LoginPage
+27      private val apiRepository = ApiRepositoryImpl()
+28      private val validator = Validator()
+29      private lateinit var username: TextInputEditText
+30      private lateinit var password: TextInputEditText
+31      private lateinit var usernameContainer: TextInputLayout
+32      private lateinit var passwordContainer: TextInputLayout
+33      private lateinit var userId: String
+34      private lateinit var userRole: String
+35  
+36      override fun onCreate(savedInstanceState: Bundle?) {
+37          super.onCreate(savedInstanceState)
+38          enableEdgeToEdge()
+39          setContentView(R.layout.activity_login_page)
+40          init()
+41      }
+42  
+43      private fun init() {
+44          username = findViewById(R.id.loginEditText)
+45          password = findViewById(R.id.passwordEditText)
+46  
+47          usernameContainer = findViewById(R.id.loginContainer)
+48          passwordContainer = findViewById(R.id.passwordContainer)
+49  
+50          username.let { u ->
+51              u.doOnTextChanged { _, _, _, _ ->
+52                  usernameContainer.let { c -> c.helperText = validateUsername() }
+53              }
+54          }
+55          password.let { u ->
+56              u.doOnTextChanged { _, _, _, _ ->
+57                  passwordContainer.let { c -> c.helperText = validatePassword() }
+58              }
+59          }
+60      }
+61  
+62      private fun validateUsername(): String {
+63          return validator.validateLogin(username.text.toString().trim())
+64      }
+65  
+66      private fun validatePassword(): String {
+67          return validator.validatePassword(password.text.toString().trim())
+68      }
+69  
+70      fun login(view: View) {
+71          val user = LoginRequest(username.text.toString().trim(), password.text.toString().trim())
+72  
+73          apiRepository.login(
+74              user,
+75              object :
+76                  Callback<LoginResponse> {
+77                  override fun onResponse(
+78                      call: Call<LoginResponse>,
+79                      response: Response<LoginResponse>
+80                  ) {
+81                      if (response.isSuccessful) {
+82                          val tokens = response.body()
+83                          if (tokens != null) {
+84                              userId = parseToken(tokens)
+85                              userRole = parseTokenForRole(tokens)
+86                              if (userRole == "User") {
+87                                  val intent = Intent(activity, MainUserPage::class.java)
+88                                  intent.putExtra("userId", userId)
+89                                  intent.putExtra("token", tokens.accessToken)
+90                                  startActivity(intent)
+91                                  activity.finish()
+92                              } else {
+93                                  val intent = Intent(activity, MainAdminPage::class.java)
+94                                  intent.putExtra("userId", userId)
+95                                  intent.putExtra("token", tokens.accessToken)
+96                                  startActivity(intent)
+97                                  activity.finish()
+98                              }
+99                          } else {
+100                              AlertDialog.Builder(activity)
+101                                  .setTitle("Sing in")
+102                                  .setMessage("Something went wrong. Try again later.")
+103                                  .setPositiveButton("Okay") { _, _ ->
+104                                      username.setText("")
+105                                      password.setText("")
+106                                  }
+107                                  .show()
+108                              Log.d("error", response.code().toString());
+109                          }
+110                      } else {
+111                          Log.d("Error status code", response.code().toString())
+112                          Log.d("Error message", response.message().toString())
+113                          AlertDialog.Builder(activity)
+114                              .setTitle("Sing in")
+115                              .setMessage("Something went wrong. Try again later.")
+116                              .setPositiveButton("Okay") { _, _ ->
+117                                  username.setText("")
+118                                  password.setText("")
+119                              }
+120                              .show()
+121                      }
+122                  }
+123  
+124                  override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+125                      Log.d("Error", t.message.toString())
+126                      AlertDialog.Builder(activity)
+127                          .setTitle("Sing in")
+128                          .setMessage("Something went wrong. Try again later.")
+129                          .setPositiveButton("Okay") { _, _ ->
+130                              username.setText("")
+131                              password.setText("")
+132                          }
+133                          .show()
+134                  }
+135              })
+136      }
+137  
+138      fun registration(view: View) {
+139          val intent = Intent(activity, RegisterPage::class.java)
+140          startActivity(intent)
+141      }
+142  
+143      private fun parseToken(tokens: LoginResponse): String {
+144          try {
+145              val decodedJWT: DecodedJWT = JWT.decode(tokens.accessToken)
+146  
+147              val issuer = decodedJWT.issuer
+148  
+149              val id = decodedJWT.getClaim("id").asString()
+150  
+151              Log.d("Issuer", issuer)
+152              Log.d("CustomClaim", id)
+153  
+154              return id
+155          } catch (e: Exception) {
+156              Log.e("TokenParsingError", e.message ?: "Unknown error occurred")
+157          }
+158          return "";
+159      }
+160  
+161      private fun parseTokenForRole(tokens: LoginResponse): String {
+162          try {
+163              val decodedJWT: DecodedJWT = JWT.decode(tokens.accessToken)
+164  
+165              val issuer = decodedJWT.issuer
+166  
+167              val role = decodedJWT.getClaim("role").asString()
+168  
+169              Log.d("Issuer", issuer)
+170              Log.d("CustomClaim", role)
+171  
+172              return role
+173          } catch (e: Exception) {
+174              Log.e("TokenParsingError", e.message ?: "Unknown error occurred")
+175          }
+176          return "";}}
